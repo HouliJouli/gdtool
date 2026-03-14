@@ -2,7 +2,7 @@
   "name": "game-design-tool",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://SEU-USUARIO.github.io/gdtool",
+  "homepage": "https://HouliJouli.github.io/gdtool",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
