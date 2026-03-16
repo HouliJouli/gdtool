@@ -28,7 +28,7 @@ const TR = {
       {n:'03',icon:'🧩',color:'#22d3ee',title:'Crie documentos',text:'Cada módulo tem documentos com editor e chat próprios.'},
       {n:'04',icon:'📥',color:'#34d399',title:'Exporte em PDF',text:'Selecione módulos e docs, gere um PDF profissional com capa e sumário.'},
     ],
-    mods_tag:'MÓDULOS',mods_h:'7 módulos especializados',
+    mods_tag:'MÓDULOS',mods_h:'8 módulos especializados',
     fw_tag:'PARA QUEM É',fw_h:'Feito para quem cria jogos',
     fw_items:[
       {icon:'🎮',title:'Game Designers',text:'Do indie solo ao estúdio — o Game Design Tool é o seu espaço de criação.'},
@@ -74,7 +74,7 @@ const TR = {
       {n:'03',icon:'🧩',color:'#22d3ee',title:'Create documents',text:'Each module has documents with their own editor and chat.'},
       {n:'04',icon:'📥',color:'#34d399',title:'Export as PDF',text:'Select modules and docs, generate a professional PDF with cover and index.'},
     ],
-    mods_tag:'MODULES',mods_h:'7 specialized modules',
+    mods_tag:'MODULES',mods_h:'8 specialized modules',
     fw_tag:"WHO IT'S FOR",fw_h:'Built for game creators',
     fw_items:[
       {icon:'🎮',title:'Game Designers',text:'From solo indie to studio — Game Design Tool is your creative space.'},
@@ -112,6 +112,7 @@ const TR = {
 const MODULES_I18N = {
   pt:[
     {id:'brainstorming',icon:'💡',label:'Brainstorming & Benchmarking',color:'#fb923c',desc:'Canvas livre para ideias visuais, post-its e benchmarking de jogos com IA.'},
+    {id:'production',icon:'🏭',label:'Produção',color:'#f43f5e',desc:'Gerencie o desenvolvimento com um quadro Kanban visual — tarefas, prioridades e progresso da equipe.'},
     {id:'mechanics',icon:'⚙️',label:'Mecânicas',color:'#fbbf24',desc:'Sistemas, regras e game loops. Crie documentos em branco ou guiados por frameworks como MDA.'},
     {id:'characters',icon:'🧙',label:'Personagens',color:'#a855f7',desc:'Fichas completas, backstories e arcos narrativos.'},
     {id:'worldbuilding',icon:'🌍',label:'Worldbuilding',color:'#22d3ee',desc:'Lore, mapas, fações e história do mundo.'},
@@ -121,6 +122,7 @@ const MODULES_I18N = {
   ],
   en:[
     {id:'brainstorming',icon:'💡',label:'Brainstorming & Benchmarking',color:'#fb923c',desc:'Free canvas for visual ideas, sticky notes and game benchmarking with AI.'},
+    {id:'production',icon:'🏭',label:'Production',color:'#f43f5e',desc:'Manage development with a visual Kanban board — tasks, priorities and team progress.'},
     {id:'mechanics',icon:'⚙️',label:'Mechanics',color:'#fbbf24',desc:'Systems, rules and game loops. Create blank docs or guided by frameworks like MDA.'},
     {id:'characters',icon:'🧙',label:'Characters',color:'#a855f7',desc:'Full character sheets, backstories and narrative arcs.'},
     {id:'worldbuilding',icon:'🌍',label:'Worldbuilding',color:'#22d3ee',desc:'Lore, maps, factions and world history.'},
@@ -232,7 +234,7 @@ function htmlToOoxml(html){
   return Array.from(doc.body.firstChild.childNodes).map(n=>nodeToOoxml(n)).join('')||'<w:p/>';
 }
 function exportToPDF(project,sections){
-  const STATUS_L={ progress:{label:'Em andamento',color:'#fbbf24'}, done:{label:'Concluído',color:'#34d399'} };
+  const STATUS_L={ progress:{label:'Em andamento',color:'#fbbf24',bg:'#fbbf2415'}, done:{label:'Concluído',color:'#34d399',bg:'#34d39915'} };
   const html=sections.map(({mod,docs})=>`
     <div class="module">
       <h2 class="mod-title"><span class="mod-icon">${mod.icon}</span>${mod.label}</h2>
@@ -246,7 +248,7 @@ function exportToPDF(project,sections){
         return`<div class="doc">
           <div class="doc-header">
             <span class="doc-title">${xesc(doc.title)}</span>
-            <span class="doc-status" style="color:${st.color}">${st.label}</span>
+            <span class="doc-status" style="color:${st.color};border-color:${st.color}40;background:${st.color}18">${st.label}</span>
           </div>
           <div class="doc-meta">${meta}</div>
           <div class="doc-content">${content}</div>
@@ -255,87 +257,92 @@ function exportToPDF(project,sections){
     </div>
   `).join('');
 
-  const fullHtml=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
-<title>GDD — ${xesc(project.name)}</title>
-<style>
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:'Segoe UI',system-ui,sans-serif;color:#1a1a2a;background:#fff;}
-  @page{margin:18mm 18mm 18mm 18mm;}
-  @media print{
-    .no-print{display:none!important;}
-    .cover{background:#0c0c14!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-    .cover *{color:inherit!important;}
-    .doc{page-break-inside:avoid;}
-  }
-  .toolbar{position:fixed;top:0;left:0;right:0;z-index:9999;background:#1e1e30;padding:10px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:2px solid #7c3aed;font-family:system-ui,sans-serif;}
-  .toolbar-title{color:#a78bfa;font-size:13px;font-weight:600;}
-  .toolbar-btns{display:flex;gap:8px;align-items:center;}
-  .btn-pdf{background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:8px 20px;cursor:pointer;font-size:13px;font-weight:700;}
-  .btn-close{background:#2a2a40;color:#a78bfa;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;font-size:13px;font-weight:700;}
-  .spacer{height:56px;}
-  .cover{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:60px 40px;background:#0c0c14;color:#fff;page-break-after:always;}
-  .cover-emoji{font-size:80px;margin-bottom:24px;line-height:1;}
-  .cover-title{font-size:44px;font-weight:900;color:#fff;margin-bottom:8px;}
-  .cover-gdd{font-size:16px;color:#a78bfa;font-weight:600;letter-spacing:3px;text-transform:uppercase;margin-bottom:16px;}
-  .cover-meta{font-size:14px;color:#888;margin-bottom:4px;}
-  .cover-date{font-size:12px;color:#475569;margin-top:14px;}
-  .cover-bar{width:60px;height:4px;background:linear-gradient(90deg,#7c3aed,#a78bfa);border-radius:2px;margin:20px auto;}
-  .content{max-width:740px;margin:0 auto;padding:48px 40px;}
-  .module{margin-bottom:48px;}
-  .mod-title{font-size:21px;font-weight:800;color:#4c1d95;padding-bottom:10px;border-bottom:2px solid #7c3aed;margin-bottom:22px;display:flex;align-items:center;gap:10px;}
-  .mod-icon{font-size:19px;}
-  .doc{margin-bottom:26px;padding:18px 20px;border:1px solid #e5e7eb;border-radius:10px;background:#fafafa;}
-  .doc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;gap:12px;}
-  .doc-title{font-size:15px;font-weight:700;color:#111827;flex:1;}
-  .doc-status{font-size:10px;font-weight:700;white-space:nowrap;flex-shrink:0;}
-  .doc-meta{font-size:11px;color:#9ca3af;margin-bottom:10px;font-style:italic;}
-  .doc-content{font-size:13px;color:#374151;line-height:1.75;}
-  .doc-content h2{font-size:15px;font-weight:700;color:#1f2937;margin:14px 0 6px;}
-  .doc-content h3{font-size:13px;font-weight:700;color:#374151;margin:10px 0 4px;}
-  .doc-content p{margin-bottom:6px;}
-  .doc-content ul,.doc-content ol{margin:6px 0 6px 18px;}
-  .doc-content li{margin-bottom:3px;}
-  .doc-content strong{font-weight:700;}
-  .doc-content em{font-style:italic;color:#6b7280;}
-  .doc-content hr{border:none;border-top:1px solid #e5e7eb;margin:10px 0;}
-  .doc-content code{background:#f3f4f6;padding:1px 5px;border-radius:3px;font-size:12px;}
-  .flow-info{font-style:italic;color:#6b7280;}
-</style>
-</head>
-<body>
-  <div class="toolbar no-print">
-    <span class="toolbar-title">📄 ${xesc(project.name)} — Game Design Document</span>
-    <div class="toolbar-btns">
-      <button class="btn-pdf" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
-      <button class="btn-close" onclick="window.close()">✕ Fechar</button>
-    </div>
-  </div>
-  <div class="spacer no-print"></div>
-  <div class="cover">
-    <div class="cover-emoji">${project.emoji}</div>
-    <div class="cover-title">${xesc(project.name)}</div>
-    <div class="cover-bar"></div>
-    <div class="cover-gdd">Game Design Document</div>
-    <div class="cover-meta">${xesc(project.genre)} · ${xesc(project.platform)}</div>
-    <div class="cover-date">Exportado em ${todayStr()}</div>
-  </div>
-  <div class="content">${html}</div>
-</body></html>`;
+  const css=`
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Segoe UI',system-ui,sans-serif;color:#1a1a2a;background:#fff;}
+    @page{margin:18mm 18mm 18mm 18mm;}
+    @media print{
+      #__gdt_overlay_toolbar{display:none!important;}
+      .cover{background:#0c0c14!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+      .cover *{color:inherit!important;}
+      .doc{page-break-inside:avoid;}
+    }
+    #__gdt_overlay{position:fixed;inset:0;z-index:99999;background:#fff;overflow-y:auto;}
+    #__gdt_overlay_toolbar{position:sticky;top:0;z-index:100000;background:#1e1e30;padding:10px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:2px solid #7c3aed;}
+    #__gdt_overlay_toolbar span{color:#a78bfa;font-family:system-ui,sans-serif;font-size:13px;font-weight:600;}
+    #__gdt_overlay_toolbar button{font-family:system-ui,sans-serif;font-size:13px;font-weight:700;border:none;border-radius:8px;padding:8px 18px;cursor:pointer;}
+    .btn-print{background:#7c3aed;color:#fff;}
+    .btn-close{background:#2a2a40;color:#a78bfa;}
+    .cover{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:60px 40px;background:#0c0c14;color:#fff;page-break-after:always;}
+    .cover-emoji{font-size:80px;margin-bottom:24px;line-height:1;}
+    .cover-title{font-size:44px;font-weight:900;color:#fff;margin-bottom:8px;}
+    .cover-gdd{font-size:16px;color:#a78bfa;font-weight:600;letter-spacing:3px;text-transform:uppercase;margin-bottom:16px;}
+    .cover-meta{font-size:14px;color:#888;margin-bottom:4px;}
+    .cover-date{font-size:12px;color:#475569;margin-top:14px;}
+    .cover-bar{width:60px;height:4px;background:linear-gradient(90deg,#7c3aed,#a78bfa);border-radius:2px;margin:20px auto;}
+    .content{max-width:740px;margin:0 auto;padding:48px 40px;}
+    .module{margin-bottom:48px;}
+    .mod-title{font-size:21px;font-weight:800;color:#4c1d95;padding-bottom:10px;border-bottom:2px solid #7c3aed;margin-bottom:22px;display:flex;align-items:center;gap:10px;}
+    .mod-icon{font-size:19px;}
+    .doc{margin-bottom:26px;padding:18px 20px;border:1px solid #e5e7eb;border-radius:10px;background:#fafafa;}
+    .doc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;gap:12px;}
+    .doc-title{font-size:15px;font-weight:700;color:#111827;flex:1;}
+    .doc-status{font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;border:1px solid;white-space:nowrap;flex-shrink:0;}
+    .doc-meta{font-size:11px;color:#9ca3af;margin-bottom:10px;font-style:italic;}
+    .doc-content{font-size:13px;color:#374151;line-height:1.75;}
+    .doc-content h2{font-size:15px;font-weight:700;color:#1f2937;margin:14px 0 6px;}
+    .doc-content h3{font-size:13px;font-weight:700;color:#374151;margin:10px 0 4px;}
+    .doc-content p{margin-bottom:6px;}
+    .doc-content ul,.doc-content ol{margin:6px 0 6px 18px;}
+    .doc-content li{margin-bottom:3px;}
+    .doc-content strong{font-weight:700;}
+    .doc-content em{font-style:italic;color:#6b7280;}
+    .doc-content hr{border:none;border-top:1px solid #e5e7eb;margin:10px 0;}
+    .doc-content code{background:#f3f4f6;padding:1px 5px;border-radius:3px;font-size:12px;}
+    .flow-info{font-style:italic;color:#6b7280;}
+  `;
 
-  const win=window.open('','_blank','width=900,height=700');
-  if(win){
-    win.document.write(fullHtml);
-    win.document.close();
-  } else {
-    // Fallback se popup bloqueado: abre em nova aba via data URI
-    const a=document.createElement('a');
-    const filename=(project.name||'GDD').replace(/[^\w\s-]/g,'').trim().replace(/\s+/g,'_')+'_GDD.html';
-    a.href='data:text/html;charset=utf-8,'+encodeURIComponent(fullHtml);
-    a.download=filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  }
+  // Remove overlay anterior se existir
+  const old = document.getElementById('__gdt_overlay');
+  if(old) old.remove();
+
+  // Cria o overlay dentro da página atual (funciona em qualquer sandbox)
+  const overlay = document.createElement('div');
+  overlay.id = '__gdt_overlay';
+
+  const style = document.createElement('style');
+  style.textContent = css;
+  overlay.appendChild(style);
+
+  // Toolbar com botões Imprimir/PDF e Fechar
+  const toolbar = document.createElement('div');
+  toolbar.id = '__gdt_overlay_toolbar';
+  toolbar.innerHTML = `
+    <span>📄 ${xesc(project.name)} — Game Design Document</span>
+    <div style="display:flex;gap:8px">
+      <button class="btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+      <button class="btn-close" onclick="document.getElementById('__gdt_overlay').remove()">✕ Fechar</button>
+    </div>
+  `;
+  overlay.appendChild(toolbar);
+
+  // Conteúdo do GDD
+  const body = document.createElement('div');
+  body.innerHTML = `
+    <div class="cover">
+      <div class="cover-emoji">${project.emoji}</div>
+      <div class="cover-title">${xesc(project.name)}</div>
+      <div class="cover-bar"></div>
+      <div class="cover-gdd">Game Design Document</div>
+      <div class="cover-meta">${xesc(project.genre)} · ${xesc(project.platform)}</div>
+      <div class="cover-date">Exportado em ${todayStr()}</div>
+    </div>
+    <div class="content">${html}</div>
+  `;
+  overlay.appendChild(body);
+
+  document.body.appendChild(overlay);
+  overlay.scrollTop = 0;
 }
 
 // ── ImgResizeBar ──────────────────────────────────────────────────────────────
@@ -699,6 +706,9 @@ function DoubleAGuide({project,pData,setPData,onBack,onDocCreated}){
   const [aiInput,setAiInput]=useState('');
   const [aiMsgs,setAiMsgs]=useState([[],[],[],[],[],[]]);
   const [aiLoad,setAiLoad]=useState(false);
+  const [charImgUpload,setCharImgUpload]=useState('');
+  const charImgFileRef=useRef(null);
+
   const chatEndRef=useRef(null);
 
   useEffect(()=>{chatEndRef.current?.scrollIntoView({behavior:'smooth'});},[aiMsgs,aiLoad]);
@@ -745,6 +755,15 @@ Escreva 2 a 3 frases que capturem a essência do personagem — sua forma de agi
       const d=await r.json();
       setConceito(d.content?.[0]?.text||'');
     }catch(e){console.error(e);}finally{setConceitoLoading(false);}
+  };
+
+
+  const handleCharImgUpload=(e)=>{
+    const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();
+    r.onload=ev=>setCharImgUpload(ev.target.result);
+    r.readAsDataURL(f);
+    e.target.value='';
   };
 
   const sendAi=async(msg)=>{
@@ -794,7 +813,9 @@ ${idade?`<li><strong>Idade:</strong> ${idade}</li>`:''}
 ${estiloVisual?`<li><strong>Estilo Visual:</strong> ${estiloVisual}</li>`:''}
 ${equipamentos?`<li><strong>Equipamentos:</strong> ${equipamentos}</li>`:''}
 ${combate?`<li><strong>Estilo de Combate:</strong> ${combate}</li>`:''}
-</ul>`;
+</ul>
+${charImgUpload?`<hr><h2>🖼️ Imagem do Personagem</h2><figure style="margin:12px 0;text-align:center"><img src="${charImgUpload}" alt="${docTitle}" style="max-width:100%;border-radius:10px;display:block;margin:0 auto"><figcaption style="font-size:12px;color:#6b7280;margin-top:6px;font-style:italic">${docTitle}${raca?' · '+raca:''}</figcaption></figure>`:''}`;
+
   };
 
   const saveDoc=()=>{
@@ -1041,31 +1062,82 @@ ${combate?`<li><strong>Estilo de Combate:</strong> ${combate}</li>`:''}
           {/* STEP 3 — Conceito */}
           {step===3&&(
             <>
-              <div style={{background:'#a855f708',border:'1px solid #a855f720',borderRadius:10,padding:'12px 14px',fontSize:12,color:'var(--gdd-muted)',lineHeight:1.65}}>
-                <strong style={{color:DA_CLR}}>Mecânica: </strong>{mecanica}<br/>
-                <strong style={{color:DA_CLR}}>Atributos: </strong>{selAt.join(', ')||'—'}<br/>
-                <strong style={{color:DA_CLR}}>Arquétipos: </strong>{selAq.join(', ')||'—'}
+              {/* ── Resumo de tudo que foi preenchido ── */}
+              <div style={{background:'var(--gdd-bg2)',border:'1px solid '+DA_CLR+'22',borderRadius:12,padding:'16px 18px',display:'flex',flexDirection:'column',gap:14}}>
+                <div style={{fontSize:10,color:DA_CLR,fontWeight:700,letterSpacing:1.5,textTransform:'uppercase',marginBottom:2}}>📋 Sua base — o que você já definiu</div>
+
+                {/* Mecânica */}
+                <div>
+                  <div style={{fontSize:10,color:DA_CLR,fontWeight:700,letterSpacing:.8,textTransform:'uppercase',marginBottom:4}}>⚔️ Mecânica</div>
+                  <div style={{fontSize:12,color:'var(--gdd-muted)',lineHeight:1.6,background:'var(--gdd-bg)',borderRadius:7,padding:'8px 11px',border:'1px solid var(--gdd-border2)'}}>{mecanica||'—'}</div>
+                </div>
+
+                {/* Atributos */}
+                <div>
+                  <div style={{fontSize:10,color:DA_CLR,fontWeight:700,letterSpacing:.8,textTransform:'uppercase',marginBottom:6}}>✦ Atributos selecionados</div>
+                  {selAt.length===0
+                    ?<div style={{fontSize:12,color:'#334155',fontStyle:'italic'}}>Nenhum atributo selecionado</div>
+                    :<div style={{display:'flex',flexDirection:'column',gap:5}}>
+                      {getAtObjetos().map(a=>(
+                        <div key={a.nome} style={{background:'var(--gdd-bg)',borderRadius:7,padding:'8px 11px',border:'1px solid '+DA_CLR+'22'}}>
+                          <div style={{fontWeight:700,fontSize:12,color:DA_CLR,marginBottom:2}}>{a.nome}</div>
+                          <div style={{fontSize:11,color:'var(--gdd-dim)',lineHeight:1.5}}>{a.desc}</div>
+                          <div style={{fontSize:10,color:'#334155',marginTop:2,fontStyle:'italic'}}>Ref: {a.ex}</div>
+                        </div>
+                      ))}
+                    </div>
+                  }
+                </div>
+
+                {/* Arquétipos */}
+                <div>
+                  <div style={{fontSize:10,color:DA_CLR,fontWeight:700,letterSpacing:.8,textTransform:'uppercase',marginBottom:6}}>🎭 Arquétipos selecionados</div>
+                  {selAq.length===0
+                    ?<div style={{fontSize:12,color:'#334155',fontStyle:'italic'}}>Nenhum arquétipo selecionado</div>
+                    :<div style={{display:'flex',flexDirection:'column',gap:5}}>
+                      {getAqObjetos().map(a=>(
+                        <div key={a.nome} style={{background:'var(--gdd-bg)',borderRadius:7,padding:'8px 11px',border:'1px solid '+DA_CLR+'22'}}>
+                          <div style={{fontWeight:700,fontSize:12,color:DA_CLR,marginBottom:2}}>{a.nome}</div>
+                          <div style={{fontSize:11,color:'var(--gdd-dim)',lineHeight:1.5}}>{a.desc}</div>
+                          <div style={{fontSize:10,color:'#334155',marginTop:2,fontStyle:'italic'}}>Ref: {a.personagem}</div>
+                        </div>
+                      ))}
+                    </div>
+                  }
+                </div>
               </div>
+
+              {/* ── Configuração conceitual ── */}
               <div>
-                <div style={{fontSize:11,color:DA_CLR,fontWeight:700,letterSpacing:1,marginBottom:8,textTransform:'uppercase'}}>Configuração conceitual <span style={{color:'#ef4444'}}>*</span></div>
-                <div style={{color:'var(--gdd-muted)',fontSize:12,marginBottom:10,lineHeight:1.6}}>A IA vai gerar uma descrição conceitual única com base nas suas escolhas. Você pode editar livremente o resultado.</div>
-                {!conceito&&(
+                <div style={{fontSize:11,color:DA_CLR,fontWeight:700,letterSpacing:1,marginBottom:6,textTransform:'uppercase'}}>
+                  Configuração conceitual <span style={{color:'#ef4444'}}>*</span>
+                </div>
+                <div style={{color:'var(--gdd-muted)',fontSize:12,marginBottom:12,lineHeight:1.65}}>
+                  Escreva a essência do personagem com suas próprias palavras — ou use a IA para gerar uma proposta com base no que você definiu. Use o resumo acima como referência.
+                </div>
+
+                {/* Textarea sempre visível */}
+                <TA value={conceito} onChange={setConceito}
+                  placeholder={'Com base na mecânica, atributos e arquétipos acima, descreva a essência de '+docTitle+': sua forma de agir, identidade narrativa e o que o torna único…'}
+                  rows={5}/>
+
+                {/* Botão IA — abaixo da textarea */}
+                <div style={{display:'flex',alignItems:'center',gap:8,marginTop:10}}>
+                  <div style={{flex:1,height:1,background:'var(--gdd-border2)'}}/>
+                  <span style={{fontSize:10,color:'#334155',whiteSpace:'nowrap'}}>ou gerar com IA</span>
+                  <div style={{flex:1,height:1,background:'var(--gdd-border2)'}}/>
+                </div>
+                <button onClick={generateConceito} disabled={conceitoLoading}
+                  style={{marginTop:10,width:'100%',background:conceitoLoading?'var(--gdd-border2)':DA_CLR+'18',border:'1px solid '+(conceitoLoading?'var(--gdd-border)':DA_CLR+'55'),color:conceitoLoading?'var(--gdd-muted)':DA_CLR,borderRadius:9,padding:'10px 0',cursor:conceitoLoading?'not-allowed':'pointer',fontWeight:700,fontSize:13,transition:'all .15s'}}>
+                  {conceitoLoading?'✦ Gerando…':'✦ Gerar configuração conceitual com IA'}
+                </button>
+                {conceito&&!conceitoLoading&&(
                   <button onClick={generateConceito} disabled={conceitoLoading}
-                    style={{...S.btn(DA_CLR,'#fff',{padding:'12px 24px',fontSize:14,fontWeight:700,borderRadius:10,width:'100%',marginBottom:14})}}>
-                    {conceitoLoading?'✦ Gerando configuração conceitual…':'✦ Gerar configuração conceitual com IA'}
+                    style={{marginTop:6,background:'none',border:'none',color:'var(--gdd-border)',cursor:'pointer',fontSize:11,padding:'2px 0',display:'flex',alignItems:'center',gap:4}}
+                    onMouseEnter={e=>e.currentTarget.style.color='var(--gdd-muted)'}
+                    onMouseLeave={e=>e.currentTarget.style.color='var(--gdd-border)'}>
+                    ↺ Gerar nova sugestão (substitui o texto atual)
                   </button>
-                )}
-                {conceitoLoading&&(
-                  <div style={{background:'var(--gdd-bg2)',border:'1px solid '+DA_CLR+'22',borderRadius:10,padding:'20px',textAlign:'center',color:'var(--gdd-muted)',fontSize:13}}>
-                    A IA está combinando mecânica, atributos e arquétipos…
-                  </div>
-                )}
-                {conceito&&(
-                  <>
-                    <div style={{background:DA_CLR+'08',border:'1px solid '+DA_CLR+'30',borderRadius:10,padding:'14px 16px',marginBottom:10,fontSize:13,color:'var(--gdd-text)',lineHeight:1.8,fontStyle:'italic'}}>"{conceito}"</div>
-                    <TA value={conceito} onChange={setConceito} placeholder="Edite o conceito gerado..." rows={4}/>
-                    <button onClick={generateConceito} disabled={conceitoLoading} style={{marginTop:8,...S.btn('var(--gdd-border2)','var(--gdd-muted)',{fontSize:11,padding:'5px 12px'})}}>↺ Gerar novamente</button>
-                  </>
                 )}
               </div>
             </>
@@ -1097,13 +1169,41 @@ ${combate?`<li><strong>Estilo de Combate:</strong> ${combate}</li>`:''}
               <div>
                 <div style={{fontSize:10,color:DA_CLR,fontWeight:700,letterSpacing:.5,marginBottom:5,textTransform:'uppercase'}}>Estilo visual e estética</div>
                 <TA value={estiloVisual} onChange={setEstiloVisual} placeholder="Descreva a identidade visual — cores, silhueta, vestimenta, mood..." rows={3}/>
+
+                {/* ── Upload de imagem do personagem ── */}
+                <div style={{marginTop:12,background:'var(--gdd-bg2)',border:'1px solid '+DA_CLR+'22',borderRadius:10,padding:'12px 14px'}}>
+                  <div style={{fontSize:10,color:DA_CLR,fontWeight:700,letterSpacing:.8,textTransform:'uppercase',marginBottom:8}}>🖼️ Imagem do personagem <span style={{color:'var(--gdd-border)',fontWeight:400,textTransform:'none',letterSpacing:0}}>(opcional)</span></div>
+
+                  {/* Preview */}
+                  {charImgUpload&&(
+                    <div style={{marginBottom:10,position:'relative',display:'inline-block'}}>
+                      <img src={charImgUpload} alt={docTitle}
+                        style={{width:180,height:180,objectFit:'cover',borderRadius:8,display:'block',border:'2px solid '+DA_CLR+'44'}}/>
+                      <button onClick={()=>setCharImgUpload('')} title="Remover imagem"
+                        style={{position:'absolute',top:4,right:4,background:'rgba(0,0,0,.65)',border:'none',color:'#fff',borderRadius:'50%',width:20,height:20,cursor:'pointer',fontSize:11,lineHeight:1,display:'flex',alignItems:'center',justifyContent:'center'}}>✕</button>
+                    </div>
+                  )}
+
+                  <div style={{display:'flex',alignItems:'center',gap:8}}>
+                    <button onClick={()=>charImgFileRef.current?.click()}
+                      style={{background:'var(--gdd-bg3)',border:'1px solid var(--gdd-border)',color:'var(--gdd-muted)',borderRadius:7,padding:'6px 13px',cursor:'pointer',fontWeight:600,fontSize:12,display:'flex',alignItems:'center',gap:6,transition:'border-color .15s'}}
+                      onMouseEnter={e=>e.currentTarget.style.borderColor=DA_CLR+'66'}
+                      onMouseLeave={e=>e.currentTarget.style.borderColor='var(--gdd-border)'}>
+                      <span>📁</span>{charImgUpload?'Trocar imagem':'Upload do computador'}
+                    </button>
+                    <input ref={charImgFileRef} type="file" accept="image/*" style={{display:'none'}} onChange={handleCharImgUpload}/>
+                    <span style={{fontSize:10,color:'#334155'}}>Incluída no documento gerado</span>
+                  </div>
+                </div>
               </div>
+
               <div>
                 <div style={{fontSize:10,color:DA_CLR,fontWeight:700,letterSpacing:.5,marginBottom:5,textTransform:'uppercase'}}>Equipamentos e artefatos</div>
                 <TA value={equipamentos} onChange={setEquipamentos} placeholder="Liste armas, armaduras, itens especiais ou artefatos do personagem..." rows={3}/>
               </div>
             </>
           )}
+
 
           {/* STEP 5 — Compilar */}
           {step===5&&(
@@ -2994,7 +3094,7 @@ ${overallVision?`<blockquote><strong>Visão geral:</strong> ${overallVision}</bl
                   <span style={{fontSize:10,color:c.color,fontWeight:700,whiteSpace:'nowrap'}}>Score-alvo: {compData[c.id].targetScore}/7</span>
                   <input type="range" min={3} max={7} value={compData[c.id].targetScore} onChange={e=>setComp(c.id,'targetScore',+e.target.value)} style={{flex:1,accentColor:c.color,cursor:'pointer'}}/>
                   <span style={{fontSize:10,color:'var(--gdd-muted)',whiteSpace:'nowrap',minWidth:50}}>
-                    {(s=>s>=6?'Excelente':s>=5?'Bom':s>=4?'Aceitavel':'Minimo')(compData[c.id].targetScore)}
+                    {compData[c.id].targetScore>=6?'Excelente':compData[c.id].targetScore>=5?'Bom':compData[c.id].targetScore>=4?'Aceitável':'Mínimo'}
                   </span>
                 </div>
                 <div style={{background:'var(--gdd-bg)',borderRadius:8,padding:'10px 12px',marginBottom:12,border:'1px solid '+'var(--gdd-border2)'}}>
@@ -4289,6 +4389,25 @@ const FB_DEFS={
 };
 const FB_PORTS=['top','right','bottom','left'];
 
+// Calcula w/h da node com base no texto — garante que nenhum label seja truncado
+function fbAutoSize(type, label){
+  const def=FB_DEFS[type];
+  const FONT_W=6.8; // largura aproximada por caractere em px (fonte 12px system-ui)
+  const PAD_X=28;   // padding horizontal total
+  const PAD_Y=20;   // padding vertical total
+  const lines=label.split('\n');
+  const maxChars=Math.max(...lines.map(l=>l.length));
+  const rawW=Math.ceil(maxChars*FONT_W)+PAD_X;
+  const rawH=lines.length*18+PAD_Y;
+  // decisão tem geometria de losango — precisa de mais espaço
+  const extraW=type==='decision'?24:0;
+  const extraH=type==='decision'?24:0;
+  return{
+    w:Math.max(def.w, rawW+extraW),
+    h:Math.max(def.h, rawH+extraH),
+  };
+}
+
 function fbPortAbs(node,port){
   const d=FB_DEFS[node.type],w=node.w||d.w,h=node.h||d.h;
   if(port==='top')    return[node.x+w/2, node.y];
@@ -4380,6 +4499,11 @@ function FlowBuilder({project,pData,setPData,doc,onBack,lang='pt'}){
   const svgRef=useRef(null);
   const docId=useRef(doc?.id||uid());
 
+  // Recalcula tamanho de todos os nós ao montar (garante que dados pré-carregados também ficam corretos)
+  useEffect(()=>{
+    setNodes(ns=>ns.map(n=>{const{w,h}=fbAutoSize(n.type,n.label);return{...n,w,h};}));
+  },[]);
+
   const saveFlow=useCallback(()=>{
     const mId='flowcharts',pId=project.id;
     const snap=`<p style="color:var(--gdd-muted);font-size:12px">${nodes.length} nó${nodes.length!==1?'s':''} · ${edges.length} conexão${edges.length!==1?'ões':''}</p>`;
@@ -4469,7 +4593,7 @@ function FlowBuilder({project,pData,setPData,doc,onBack,lang='pt'}){
     const n=nodes.find(n=>n.id===nodeId);
     setEditingId(nodeId);setEditLabel(n.label);setDragging(null);
   };
-  const commitLabel=()=>{setNodes(ns=>ns.map(n=>n.id===editingId?{...n,label:editLabel}:n));setEditingId(null);};
+  const commitLabel=()=>{setNodes(ns=>ns.map(n=>{if(n.id!==editingId)return n;const{w,h}=fbAutoSize(n.type,editLabel);return{...n,label:editLabel,w,h};}));setEditingId(null);};
   const onWheel=e=>{e.preventDefault();setZoom(z=>Math.max(0.25,Math.min(3,z*(e.deltaY>0?.88:1.12))));};
 
   const selNode=selected?.type==='node'?nodes.find(n=>n.id===selected.id):null;
@@ -4613,7 +4737,7 @@ function FlowBuilder({project,pData,setPData,doc,onBack,lang='pt'}){
                   onDoubleClick={e=>onNodeDbl(e,node.id)}>
                   <FbShape type={node.type} w={w} h={h} color={d.color} sel={isSel}/>
                   {isEditing
-                    ?<foreignObject x={6} y={h/2-13} width={w-12} height={26}>
+                    ?<foreignObject x={6} y={h/2-14} width={w-12} height={28}>
                        <input value={editLabel} onChange={e=>setEditLabel(e.target.value)}
                          onBlur={commitLabel} autoFocus
                          onKeyDown={e=>{if(e.key==='Enter')commitLabel();if(e.key==='Escape')setEditingId(null);}}
@@ -4621,7 +4745,7 @@ function FlowBuilder({project,pData,setPData,doc,onBack,lang='pt'}){
                      </foreignObject>
                     :<text x={w/2} y={h/2} textAnchor="middle" dominantBaseline="middle"
                         style={{fontSize:11.5,fill:'var(--gdd-text)',fontFamily:'system-ui',fontWeight:600,pointerEvents:'none',userSelect:'none'}}>
-                        {node.label.length>20?node.label.slice(0,19)+'…':node.label}
+                        {node.label}
                       </text>
                   }
                   {showPorts&&FB_PORTS.map(port=>{
@@ -5017,13 +5141,366 @@ function UnityLDGuide({project,pData,setPData,onBack,onDocCreated}){
   );
 }
 
+// ── KanbanBoard ───────────────────────────────────────────────────────────────
+const PROD_CLR='#f43f5e';
+const KANBAN_COLS=[
+  {id:'backlog', label:'Backlog',      icon:'📋', color:'#64748b'},
+  {id:'todo',    label:'A Fazer',      icon:'📝', color:'#f59e0b'},
+  {id:'doing',   label:'Em Andamento', icon:'⚡', color:'#3b82f6'},
+  {id:'review',  label:'Em Revisão',   icon:'🔍', color:'#a855f7'},
+  {id:'done',    label:'Concluído',    icon:'✅', color:'#34d399'},
+];
+const TASK_PRIO={
+  low:   {label:'Baixa',  icon:'↓', color:'#34d399', bg:'#34d39918'},
+  medium:{label:'Média',  icon:'→', color:'#f59e0b', bg:'#f59e0b18'},
+  high:  {label:'Alta',   icon:'↑', color:'#f43f5e', bg:'#f43f5e18'},
+};
+const TASK_CATS=['Design','Arte','Programação','Áudio','Narrativa','UI/UX','QA','Teste','Outro'];
+
+function KanbanBoard({project,pData,setPData,onBack}){
+  const getTasks=()=>pData?.[project.id]?.production?.tasks||[];
+  const setTasks=updater=>{
+    setPData(prev=>{
+      const curr=prev?.[project.id]?.production||{tasks:[]};
+      const newTasks=typeof updater==='function'?updater(curr.tasks):updater;
+      return{...prev,[project.id]:{...(prev?.[project.id]||{}),production:{...curr,tasks:newTasks}}};
+    });
+  };
+
+  const [dragId,setDragId]=useState(null);
+  const [dragOver,setDragOver]=useState(null);
+  const [showModal,setShowModal]=useState(false);
+  const [addCol,setAddCol]=useState('todo');
+  const [editTask,setEditTask]=useState(null);
+  const [form,setForm]=useState({title:'',desc:'',priority:'medium',category:'Design'});
+  const [delConfirm,setDelConfirm]=useState(null);
+  const [filterCat,setFilterCat]=useState('all');
+  const [filterPrio,setFilterPrio]=useState('all');
+  const [search,setSearch]=useState('');
+
+  const tasks=getTasks();
+  const total=tasks.length;
+  const done=tasks.filter(t=>t.column==='done').length;
+  const highPrio=tasks.filter(t=>t.priority==='high'&&t.column!=='done').length;
+  const pct=total>0?Math.round((done/total)*100):0;
+
+  const usedCats=[...new Set(tasks.map(t=>t.category).filter(Boolean))];
+
+  const filtered=tasks.filter(t=>{
+    if(filterCat!=='all'&&t.category!==filterCat)return false;
+    if(filterPrio!=='all'&&t.priority!==filterPrio)return false;
+    if(search&&!t.title.toLowerCase().includes(search.toLowerCase())&&!t.desc?.toLowerCase().includes(search.toLowerCase()))return false;
+    return true;
+  });
+
+  const openAdd=(colId='todo')=>{
+    setAddCol(colId);
+    setForm({title:'',desc:'',priority:'medium',category:'Design'});
+    setEditTask(null);setShowModal(true);
+  };
+  const openEdit=task=>{
+    setForm({title:task.title,desc:task.desc||'',priority:task.priority,category:task.category||'Design'});
+    setEditTask(task);setAddCol(task.column);setShowModal(true);
+  };
+  const saveTask=()=>{
+    if(!form.title.trim())return;
+    if(editTask){
+      setTasks(prev=>prev.map(t=>t.id===editTask.id?{...t,...form,column:addCol,updatedAt:todayStr()}:t));
+    }else{
+      setTasks(prev=>[...prev,{id:uid(),title:form.title.trim(),desc:form.desc.trim(),priority:form.priority,category:form.category,column:addCol,createdAt:todayStr(),updatedAt:null}]);
+    }
+    setShowModal(false);setEditTask(null);
+  };
+  const moveTask=(taskId,colId)=>setTasks(prev=>prev.map(t=>t.id===taskId?{...t,column:colId,updatedAt:todayStr()}:t));
+  const deleteTask=taskId=>{setTasks(prev=>prev.filter(t=>t.id!==taskId));setDelConfirm(null);};
+
+  const onDragStart=(e,taskId)=>{setDragId(taskId);e.dataTransfer.effectAllowed='move';};
+  const onDragOver=(e,colId)=>{e.preventDefault();e.dataTransfer.dropEffect='move';setDragOver(colId);};
+  const onDrop=(e,colId)=>{e.preventDefault();if(dragId)moveTask(dragId,colId);setDragId(null);setDragOver(null);};
+  const onDragEnd=()=>{setDragId(null);setDragOver(null);};
+
+  const hasFilters=filterCat!=='all'||filterPrio!=='all'||search;
+
+  return(
+    <div style={{minHeight:'100vh',background:'var(--gdd-bg)',color:'var(--gdd-text)',fontFamily:'system-ui,sans-serif',display:'flex',flexDirection:'column',height:'100vh',overflow:'hidden'}}>
+
+      {/* ── Header ── */}
+      <div style={{padding:'0 20px',height:54,borderBottom:'1px solid var(--gdd-border2)',display:'flex',alignItems:'center',justifyContent:'space-between',background:'var(--gdd-bg)',flexShrink:0,gap:12}}>
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          <button style={{background:'none',border:'1px solid var(--gdd-border)',color:'var(--gdd-muted)',borderRadius:6,padding:'5px 12px',cursor:'pointer',fontSize:12}} onClick={onBack}>← {project.emoji} {project.name}</button>
+          <span style={{color:PROD_CLR,fontWeight:800,fontSize:15,letterSpacing:-.3}}>🏭 Produção</span>
+          <span style={{background:PROD_CLR+'15',border:'1px solid '+PROD_CLR+'30',color:PROD_CLR,borderRadius:8,padding:'2px 10px',fontSize:11,fontWeight:700}}>Kanban</span>
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:8}}>
+          {/* Search */}
+          <div style={{position:'relative',display:'flex',alignItems:'center'}}>
+            <span style={{position:'absolute',left:8,color:'var(--gdd-dim)',fontSize:12,pointerEvents:'none'}}>🔎</span>
+            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar tarefa…"
+              style={{background:'var(--gdd-bg3)',border:'1px solid var(--gdd-border)',borderRadius:8,padding:'6px 10px 6px 26px',color:'var(--gdd-text)',fontSize:12,outline:'none',width:160}}/>
+          </div>
+          <button style={{background:PROD_CLR,color:'#fff',border:'none',borderRadius:8,padding:'7px 16px',cursor:'pointer',fontWeight:700,fontSize:13}}
+            onClick={()=>openAdd('todo')}>+ Nova Tarefa</button>
+        </div>
+      </div>
+
+      {/* ── Stats bar ── */}
+      <div style={{padding:'8px 20px',background:'var(--gdd-bg0)',borderBottom:'1px solid var(--gdd-border2)',display:'flex',alignItems:'center',gap:20,flexShrink:0,flexWrap:'wrap'}}>
+        {/* Progress bar */}
+        <div style={{display:'flex',alignItems:'center',gap:8,flex:1,minWidth:160}}>
+          <div style={{flex:1,height:5,background:'var(--gdd-border)',borderRadius:3,overflow:'hidden'}}>
+            <div style={{width:pct+'%',height:'100%',background:'linear-gradient(90deg,'+PROD_CLR+',#f97316)',borderRadius:3,transition:'width .4s'}}/>
+          </div>
+          <span style={{fontSize:11,color:PROD_CLR,fontWeight:700,whiteSpace:'nowrap'}}>{pct}% concluído</span>
+        </div>
+        {/* Counters */}
+        <div style={{display:'flex',gap:16,alignItems:'center'}}>
+          <span style={{fontSize:11,color:'var(--gdd-muted)'}}><strong style={{color:'var(--gdd-text)'}}>{total}</strong> tarefas</span>
+          <span style={{fontSize:11,color:'#3b82f6'}}><strong>{tasks.filter(t=>t.column==='doing').length}</strong> em andamento</span>
+          {highPrio>0&&<span style={{fontSize:11,color:'#f43f5e'}}><strong>{highPrio}</strong> alta prioridade</span>}
+          <span style={{fontSize:11,color:'#34d399'}}><strong>{done}</strong> concluída{done!==1?'s':''}</span>
+        </div>
+        {/* Filters */}
+        <div style={{display:'flex',gap:6,alignItems:'center',marginLeft:'auto'}}>
+          <select value={filterCat} onChange={e=>setFilterCat(e.target.value)}
+            style={{background:'var(--gdd-bg2)',border:'1px solid var(--gdd-border)',borderRadius:6,padding:'3px 8px',color:'var(--gdd-muted)',fontSize:11,outline:'none',cursor:'pointer'}}>
+            <option value="all">Todas categorias</option>
+            {TASK_CATS.map(c=><option key={c} value={c}>{c}</option>)}
+          </select>
+          <select value={filterPrio} onChange={e=>setFilterPrio(e.target.value)}
+            style={{background:'var(--gdd-bg2)',border:'1px solid var(--gdd-border)',borderRadius:6,padding:'3px 8px',color:'var(--gdd-muted)',fontSize:11,outline:'none',cursor:'pointer'}}>
+            <option value="all">Todas prioridades</option>
+            {Object.entries(TASK_PRIO).map(([k,v])=><option key={k} value={k}>{v.label}</option>)}
+          </select>
+          {hasFilters&&<button onClick={()=>{setFilterCat('all');setFilterPrio('all');setSearch('');}} style={{background:'none',border:'1px solid var(--gdd-border)',color:'var(--gdd-muted)',borderRadius:6,padding:'3px 8px',cursor:'pointer',fontSize:11}}>✕ Limpar</button>}
+        </div>
+      </div>
+
+      {/* ── Board ── */}
+      <div style={{flex:1,overflowX:'auto',overflowY:'hidden',display:'flex',padding:'18px 18px 18px',gap:12,position:'relative'}}>
+        {KANBAN_COLS.map(col=>{
+          const colTasks=filtered.filter(t=>t.column===col.id);
+          const allColTasks=tasks.filter(t=>t.column===col.id);
+          const isOver=dragOver===col.id;
+          return(
+            <div key={col.id}
+              style={{width:264,minWidth:264,display:'flex',flexDirection:'column',maxHeight:'100%',flexShrink:0}}
+              onDragOver={e=>onDragOver(e,col.id)}
+              onDrop={e=>onDrop(e,col.id)}
+              onDragLeave={()=>setDragOver(d=>d===col.id?null:d)}>
+
+              {/* Column header */}
+              <div style={{padding:'10px 14px 10px',background:isOver?col.color+'20':col.color+'12',border:'2px solid '+(isOver?col.color:col.color+'33'),borderBottom:'none',borderRadius:'12px 12px 0 0',display:'flex',alignItems:'center',gap:7,flexShrink:0,transition:'all .15s'}}>
+                <span style={{fontSize:15,lineHeight:1}}>{col.icon}</span>
+                <span style={{fontWeight:800,fontSize:12,color:col.color,flex:1,letterSpacing:.2}}>{col.label}</span>
+                <div style={{display:'flex',gap:4,alignItems:'center'}}>
+                  {filtered.length<tasks.length&&allColTasks.length!==colTasks.length&&
+                    <span style={{fontSize:10,color:col.color,opacity:.6}}>{colTasks.length}/</span>}
+                  <span style={{background:col.color,borderRadius:6,padding:'1px 7px',fontSize:11,color:'#000',fontWeight:800,minWidth:20,textAlign:'center'}}>{allColTasks.length}</span>
+                </div>
+              </div>
+
+              {/* Drop zone + cards */}
+              <div style={{flex:1,overflowY:'auto',padding:'8px 8px 4px',background:isOver?col.color+'08':'var(--gdd-bg2)',border:'2px solid '+(isOver?col.color:col.color+'22'),borderTop:'1px solid '+col.color+(isOver?'':'18'),borderRadius:'0 0 12px 12px',display:'flex',flexDirection:'column',gap:7,minHeight:80,transition:'all .15s'}}>
+
+                {colTasks.length===0&&(
+                  <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'18px 8px',color:'var(--gdd-border)',fontSize:11,textAlign:'center',gap:4,opacity:.6,pointerEvents:'none',flex:1}}>
+                    <span style={{fontSize:20}}>{col.icon}</span>
+                    <span>{isOver?'Solte aqui':'Vazio'}</span>
+                  </div>
+                )}
+
+                {colTasks.map(task=>{
+                  const prio=TASK_PRIO[task.priority]||TASK_PRIO.medium;
+                  const isDragging=dragId===task.id;
+                  return(
+                    <div key={task.id} draggable
+                      onDragStart={e=>onDragStart(e,task.id)}
+                      onDragEnd={onDragEnd}
+                      style={{background:'var(--gdd-bg)',border:'1px solid var(--gdd-border)',borderLeft:'3px solid '+prio.color,borderRadius:9,padding:'10px 11px',cursor:'grab',opacity:isDragging?.25:1,userSelect:'none',transition:'all .15s',flexShrink:0}}
+                      onMouseEnter={e=>{if(!isDragging){e.currentTarget.style.borderColor=col.color+'88';e.currentTarget.style.boxShadow='0 3px 12px rgba(0,0,0,.3)';e.currentTarget.style.transform='translateY(-1px)';}}}
+                      onMouseLeave={e=>{e.currentTarget.style.borderColor='var(--gdd-border)';e.currentTarget.style.borderLeftColor=prio.color;e.currentTarget.style.boxShadow='none';e.currentTarget.style.transform='none';}}>
+
+                      {/* Title row */}
+                      <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:6,marginBottom:5}}>
+                        <div style={{fontWeight:700,fontSize:12.5,lineHeight:1.4,flex:1,color:'var(--gdd-text)'}}>{task.title}</div>
+                        <div style={{display:'flex',gap:2,flexShrink:0,opacity:.5}} onMouseEnter={e=>e.currentTarget.style.opacity='1'} onMouseLeave={e=>e.currentTarget.style.opacity='.5'}>
+                          <button onClick={e=>{e.stopPropagation();openEdit(task);}} title="Editar"
+                            style={{background:'none',border:'none',color:'var(--gdd-muted)',cursor:'pointer',fontSize:12,padding:'1px 4px',borderRadius:4,lineHeight:1}}
+                            onMouseEnter={e=>e.currentTarget.style.background='var(--gdd-bg3)'}
+                            onMouseLeave={e=>e.currentTarget.style.background='none'}>✎</button>
+                          <button onClick={e=>{e.stopPropagation();setDelConfirm(task.id);}} title="Excluir"
+                            style={{background:'none',border:'none',color:'var(--gdd-muted)',cursor:'pointer',fontSize:11,padding:'1px 4px',borderRadius:4,lineHeight:1}}
+                            onMouseEnter={e=>{e.currentTarget.style.background='#f8717120';e.currentTarget.style.color='#f87171';}}
+                            onMouseLeave={e=>{e.currentTarget.style.background='none';e.currentTarget.style.color='var(--gdd-muted)';}}>✕</button>
+                        </div>
+                      </div>
+
+                      {/* Description */}
+                      {task.desc&&<div style={{color:'var(--gdd-dim)',fontSize:11,lineHeight:1.55,marginBottom:8,wordBreak:'break-word',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{task.desc}</div>}
+
+                      {/* Footer badges */}
+                      <div style={{display:'flex',gap:4,flexWrap:'wrap',alignItems:'center',marginTop:task.desc?0:2}}>
+                        <span style={{background:prio.bg,color:prio.color,borderRadius:4,padding:'1px 6px',fontSize:9.5,fontWeight:700,letterSpacing:.3}}>{prio.icon} {prio.label}</span>
+                        {task.category&&<span style={{background:'var(--gdd-bg3)',color:'var(--gdd-dim)',borderRadius:4,padding:'1px 6px',fontSize:9.5,border:'1px solid var(--gdd-border2)'}}>{task.category}</span>}
+                        <span style={{marginLeft:'auto',fontSize:9,color:'#2d3748',letterSpacing:.2}}>{task.updatedAt||task.createdAt}</span>
+                      </div>
+
+                      {/* Move to next col shortcut (only shown on hover via opacity parent trick) */}
+                    </div>
+                  );
+                })}
+
+                {/* Quick-add button */}
+                <button onClick={()=>openAdd(col.id)}
+                  style={{background:'none',border:'1px dashed '+col.color+'35',color:col.color+'70',borderRadius:8,padding:'7px',cursor:'pointer',fontSize:11.5,display:'flex',alignItems:'center',gap:5,justifyContent:'center',flexShrink:0,transition:'all .15s',marginTop:colTasks.length?4:0}}
+                  onMouseEnter={e=>{e.currentTarget.style.borderColor=col.color+'80';e.currentTarget.style.color=col.color;e.currentTarget.style.background=col.color+'0a';}}
+                  onMouseLeave={e=>{e.currentTarget.style.borderColor=col.color+'35';e.currentTarget.style.color=col.color+'70';e.currentTarget.style.background='none';}}>
+                  <span style={{fontSize:13,lineHeight:1}}>+</span> Adicionar
+                </button>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* ── Empty state ── */}
+        {tasks.length===0&&(
+          <div style={{position:'absolute',inset:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',textAlign:'center',pointerEvents:'none',zIndex:0}}>
+            <div style={{fontSize:60,marginBottom:18,opacity:.08}}>🏭</div>
+            <div style={{fontSize:17,fontWeight:800,color:'var(--gdd-muted)',marginBottom:8}}>Board de produção vazio</div>
+            <div style={{fontSize:13,color:'var(--gdd-border)',maxWidth:340,lineHeight:1.7}}>
+              Use o Kanban para organizar tarefas, bugs, assets e sprints do seu jogo.<br/>
+              Clique em <strong style={{color:PROD_CLR}}>+ Nova Tarefa</strong> para começar.
+            </div>
+          </div>
+        )}
+
+        {/* ── No results from filter ── */}
+        {tasks.length>0&&filtered.length===0&&(
+          <div style={{position:'absolute',inset:0,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',textAlign:'center',pointerEvents:'none',zIndex:0}}>
+            <div style={{fontSize:40,marginBottom:12,opacity:.15}}>🔎</div>
+            <div style={{fontSize:15,fontWeight:700,color:'var(--gdd-muted)',marginBottom:8}}>Nenhuma tarefa encontrada</div>
+            <div style={{fontSize:12,color:'var(--gdd-border)'}}>Tente ajustar os filtros ou a busca.</div>
+          </div>
+        )}
+      </div>
+
+      {/* ── Add / Edit Modal ── */}
+      {showModal&&(
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.75)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:200}}
+          onClick={e=>e.target===e.currentTarget&&(setShowModal(false),setEditTask(null))}>
+          <div style={{background:'var(--gdd-bg2)',border:'1px solid var(--gdd-border)',borderRadius:20,padding:32,width:460,boxShadow:'0 32px 80px rgba(0,0,0,.7)'}}>
+            <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:24}}>
+              <span style={{fontSize:22,lineHeight:1}}>{editTask?'✎':'🏭'}</span>
+              <div>
+                <h3 style={{margin:0,fontSize:17,fontWeight:800}}>{editTask?'Editar Tarefa':'Nova Tarefa'}</h3>
+                <div style={{fontSize:11,color:'var(--gdd-muted)',marginTop:2}}>{project.emoji} {project.name} · Produção</div>
+              </div>
+            </div>
+
+            {/* Title */}
+            <div style={{marginBottom:14}}>
+              <div style={{color:'var(--gdd-muted)',fontSize:11,marginBottom:6,fontWeight:600,textTransform:'uppercase',letterSpacing:.6}}>Título *</div>
+              <input style={{background:'var(--gdd-bg3)',border:'1px solid var(--gdd-border)',borderRadius:8,padding:'10px 14px',color:'var(--gdd-text)',fontSize:14,outline:'none',width:'100%',boxSizing:'border-box'}}
+                value={form.title} placeholder="Ex: Implementar sistema de inventário…"
+                onChange={e=>setForm(f=>({...f,title:e.target.value}))}
+                onKeyDown={e=>e.key==='Enter'&&saveTask()} autoFocus
+                onFocus={e=>e.target.style.borderColor=PROD_CLR}
+                onBlur={e=>e.target.style.borderColor='var(--gdd-border)'}/>
+            </div>
+
+            {/* Desc */}
+            <div style={{marginBottom:16}}>
+              <div style={{color:'var(--gdd-muted)',fontSize:11,marginBottom:6,fontWeight:600,textTransform:'uppercase',letterSpacing:.6}}>Descrição <span style={{opacity:.5,textTransform:'none',fontWeight:400}}>(opcional)</span></div>
+              <textarea style={{background:'var(--gdd-bg3)',border:'1px solid var(--gdd-border)',borderRadius:8,padding:'9px 13px',color:'var(--gdd-text)',fontSize:13,outline:'none',width:'100%',boxSizing:'border-box',resize:'none',height:70,lineHeight:1.6,fontFamily:'system-ui,sans-serif'}}
+                value={form.desc} placeholder="Detalhes, critérios de aceite, referências…"
+                onChange={e=>setForm(f=>({...f,desc:e.target.value}))}
+                onFocus={e=>e.target.style.borderColor=PROD_CLR}
+                onBlur={e=>e.target.style.borderColor='var(--gdd-border)'}/>
+            </div>
+
+            {/* Priority + Category */}
+            <div style={{display:'flex',gap:12,marginBottom:16}}>
+              <div style={{flex:1}}>
+                <div style={{color:'var(--gdd-muted)',fontSize:11,marginBottom:7,fontWeight:600,textTransform:'uppercase',letterSpacing:.6}}>Prioridade</div>
+                <div style={{display:'flex',gap:5}}>
+                  {Object.entries(TASK_PRIO).map(([k,v])=>(
+                    <button key={k} onClick={()=>setForm(f=>({...f,priority:k}))}
+                      style={{flex:1,background:form.priority===k?v.bg:'none',border:'1px solid '+(form.priority===k?v.color+'88':'var(--gdd-border)'),color:form.priority===k?v.color:'var(--gdd-dim)',borderRadius:7,padding:'6px 4px',cursor:'pointer',fontSize:11,fontWeight:form.priority===k?700:400,transition:'all .12s',display:'flex',flexDirection:'column',alignItems:'center',gap:1}}>
+                      <span style={{fontSize:13,lineHeight:1}}>{v.icon}</span>
+                      <span>{v.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div style={{flex:1}}>
+                <div style={{color:'var(--gdd-muted)',fontSize:11,marginBottom:7,fontWeight:600,textTransform:'uppercase',letterSpacing:.6}}>Categoria</div>
+                <select style={{background:'var(--gdd-bg3)',border:'1px solid var(--gdd-border)',borderRadius:8,padding:'8px 11px',color:'var(--gdd-text)',fontSize:12,outline:'none',width:'100%',cursor:'pointer'}}
+                  value={form.category} onChange={e=>setForm(f=>({...f,category:e.target.value}))}>
+                  {TASK_CATS.map(c=><option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+            </div>
+
+            {/* Column */}
+            <div style={{marginBottom:24}}>
+              <div style={{color:'var(--gdd-muted)',fontSize:11,marginBottom:8,fontWeight:600,textTransform:'uppercase',letterSpacing:.6}}>Coluna</div>
+              <div style={{display:'flex',gap:5,flexWrap:'wrap'}}>
+                {KANBAN_COLS.map(c=>(
+                  <button key={c.id} onClick={()=>setAddCol(c.id)}
+                    style={{background:addCol===c.id?c.color+'20':'none',border:'1px solid '+(addCol===c.id?c.color:'var(--gdd-border)'),color:addCol===c.id?c.color:'var(--gdd-muted)',borderRadius:7,padding:'5px 11px',cursor:'pointer',fontSize:11,fontWeight:addCol===c.id?700:400,transition:'all .12s'}}>
+                    {c.icon} {c.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div style={{display:'flex',gap:10}}>
+              <button style={{background:PROD_CLR,color:'#fff',border:'none',borderRadius:9,padding:'10px 0',cursor:'pointer',fontWeight:700,fontSize:13,flex:1,opacity:form.title.trim()?1:.5}}
+                onClick={saveTask} disabled={!form.title.trim()}>
+                {editTask?'💾 Salvar alterações':'+ Criar Tarefa'}
+              </button>
+              <button style={{background:'none',color:'var(--gdd-muted)',border:'1px solid var(--gdd-border)',borderRadius:9,padding:'10px 20px',cursor:'pointer',fontWeight:600,fontSize:13}}
+                onClick={()=>{setShowModal(false);setEditTask(null);}}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete Confirm ── */}
+      {delConfirm&&(
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.72)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:300}}>
+          <div style={{background:'var(--gdd-bg2)',border:'1px solid var(--gdd-border)',borderRadius:18,padding:32,width:320,textAlign:'center',boxShadow:'0 24px 64px rgba(0,0,0,.6)'}}>
+            <div style={{fontSize:38,marginBottom:12}}>🗑️</div>
+            <h3 style={{margin:'0 0 8px',fontSize:17,fontWeight:800}}>Excluir tarefa?</h3>
+            <p style={{color:'var(--gdd-dim)',fontSize:13,margin:'0 0 22px',lineHeight:1.6}}>
+              "{tasks.find(t=>t.id===delConfirm)?.title}" será removida permanentemente.
+            </p>
+            <div style={{display:'flex',gap:10,justifyContent:'center'}}>
+              <button style={{background:'#ef4444',color:'#fff',border:'none',borderRadius:8,padding:'8px 22px',cursor:'pointer',fontWeight:700,fontSize:13}}
+                onClick={()=>deleteTask(delConfirm)}>Excluir</button>
+              <button style={{background:'none',color:'var(--gdd-muted)',border:'1px solid var(--gdd-border)',borderRadius:8,padding:'8px 22px',cursor:'pointer',fontSize:13}}
+                onClick={()=>setDelConfirm(null)}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Footer ── */}
+      <div style={{padding:'6px 20px',borderTop:'1px solid var(--gdd-border2)',textAlign:'center',fontSize:10,color:'#2d3748',flexShrink:0}}>
+        Criado por <a href="https://www.linkedin.com/in/victor-hugo-costa/" target="_blank" rel="noopener noreferrer" style={{color:'#374151',textDecoration:'none',fontWeight:600}}>Victor Hugo Costa</a> para toda a comunidade Game Dev
+      </div>
+    </div>
+  );
+}
+
 // ── GDDExporter ───────────────────────────────────────────────────────────────
 function GDDExporter({project,pData,onClose,lang='pt',theme='dark'}){
   const t=TR[lang]||TR.pt;
   const th=THEMES[theme]||THEMES.dark;
   const S=mkS(th);
   const STATUS_L={ progress:{label:t.st_progress,color:'#fbbf24',bg:'#fbbf2415'}, done:{label:t.st_done,color:'#34d399',bg:'#34d39915'} };
-  const EXPORT_MODS=(MODULES_I18N[lang]||MODULES).filter(m=>m.id!=='brainstorming');
+  const EXPORT_MODS=(MODULES_I18N[lang]||MODULES).filter(m=>m.id!=='brainstorming'&&m.id!=='production');
   const [sel,setSel]=useState(()=>{
     const init={};EXPORT_MODS.forEach(m=>{const docs=pData?.[project.id]?.[m.id]?.docs||[];if(docs.length>0)init[m.id]={checked:true,docs:Object.fromEntries(docs.map(d=>[d.id,true]))};});return init;
   });
@@ -5144,7 +5621,52 @@ function GDDHubInner(){
     {id:3,name:'Neon Runners',      genre:'Endless Runner', platform:'Mobile',      color:'#f59e0b',emoji:'🏃',progress:10},
   ]);
   const [project,setProject]=useState(null),[module,setModule]=useState(null),[activeDoc,setActiveDoc]=useState(null);
-  const [pData,setPData]=useState({});
+  const [pData,setPData]=useState({
+    1:{
+      mechanics:{docs:[
+        {id:'m1',title:'Sistema de Combate — Ecos e Ressonância',content:`<h2>⚔️ Sistema de Combate — Ecos e Ressonância</h2><p>O sistema central de combate de <strong>Echoes of the Void</strong> é construído em torno da mecânica de <strong>Ecos</strong>: toda ação do jogador gera uma "onda" no ambiente que pode ser amplificada, refletida ou absorvida dependendo do contexto.</p><hr><h3>Loop Principal</h3><p>O jogador alterna entre dois estados: <strong>Modo Físico</strong> (ataques diretos, movimentação tangível) e <strong>Modo Etéreo</strong> (habilidades baseadas em Ecos, teleporte curto, invisibilidade parcial). Trocar de modo tem custo de <em>Ressonância</em> — o recurso principal do jogo.</p><h3>Recursos</h3><ul><li><strong>Ressonância</strong> — barra principal. Regenera ao atacar em Modo Físico. Consome em habilidades Etéreas.</li><li><strong>Vitalidade</strong> — HP tradicional. Não regenera sozinha; requer consumíveis ou habilidades específicas.</li><li><strong>Ecos Ativos</strong> — contador de até 5 Ecos no campo. Cada Echo causa efeitos passivos e pode ser "detonado" por habilidades específicas.</li></ul><hr><h3>Mecânica de Ecos</h3><p>Ao acertar inimigos, o jogador deposita um <em>Eco</em> neles. Ecos acumulam e criam combos:</p><ul><li><strong>1 Eco</strong> — dano leve bônus no próximo ataque</li><li><strong>3 Ecos</strong> — stagger automático no inimigo</li><li><strong>5 Ecos</strong> — habilidade <em>Ressonância Total</em> disponível: explosão em área</li></ul><hr><h3>Balanceamento de Risco/Recompensa</h3><p>Permanecer no Modo Etéreo por muito tempo drena Ressonância até zerar, forçando o jogador de volta ao Físico em momento vulnerável. O loop de risco está em saber quando trocar de modo para maximizar Ecos sem se expor demais.</p>`,messages:[],status:'done',createdAt:'10/03/2026',updatedAt:'12/03/2026'},
+        {id:'m2',title:'Progressão e Árvore de Habilidades',content:`<h2>📈 Progressão e Árvore de Habilidades</h2><p>A progressão em <strong>Echoes of the Void</strong> é não-linear. O jogador coleta <em>Fragmentos de Vácuo</em> ao derrotar inimigos e explorar o mundo, usando-os para desbloquear nós em três árvores independentes.</p><hr><h3>Árvore Física — "Carne e Aço"</h3><p>Focada em resistência, dano direto e capacidade de absorver golpes. Ideal para jogadores que preferem combate agressivo e frontal.</p><ul><li>Linha de Resistência: aumento de HP, armadura passiva, redução de knockback</li><li>Linha de Brutalidade: multiplicadores de dano crítico, animações de ataque mais rápidas</li><li>Linha de Impulso: dash com i-frames, contra-ataque automático</li></ul><h3>Árvore Etérea — "Vácuo e Sombra"</h3><p>Focada na mecânica de Ecos, habilidades especiais e mobilidade. Requer maior domínio do sistema de Ressonância.</p><ul><li>Linha de Amplificação: Ecos causam mais dano, acumulam mais rápido</li><li>Linha de Distorção: teleporte de maior alcance, passagem por barreiras</li><li>Linha de Ruptura: habilidade ultimate de ruptura dimensional</li></ul><h3>Árvore Híbrida — "Equilíbrio do Caos"</h3><p>Desbloqueada após investir pelo menos 5 pontos em cada uma das outras duas árvores. Oferece habilidades que combinam Físico + Etéreo simultaneamente, criando os combos mais poderosos do jogo.</p><hr><h3>Prestige System</h3><p>Ao atingir o nível máximo, o jogador pode fazer "Ressonância Ascendente" — resetar a árvore mas manter os efeitos passivos permanentes. Incentiva múltiplas runs com builds diferentes.</p>`,messages:[],status:'done',createdAt:'11/03/2026',updatedAt:'13/03/2026'},
+        {id:'m3',title:'Sistema de Mundo Aberto — Zonas de Vácuo',content:`<h2>🌍 Sistema de Mundo Aberto — Zonas de Vácuo</h2><p>O mundo de Echoes of the Void é dividido em <strong>Zonas de Vácuo</strong>: regiões onde a barreira entre o plano físico e o Vácuo Etéreo é mais fina. Cada zona tem comportamentos únicos que afetam o gameplay.</p><hr><h3>Tipos de Zona</h3><ul><li><strong>Zona Estável</strong> — ambiente padrão. Troca de modo tem custo normal de Ressonância.</li><li><strong>Zona Amplificada</strong> — habilidades Etéreas custam 50% menos. Inimigos mais agressivos.</li><li><strong>Zona Suprimida</strong> — Modo Etéreo desabilitado. Só combate físico. Alta densidade de recursos.</li><li><strong>Zona de Ruptura</strong> — o ambiente colapsa periodicamente. Alto risco, recompensas raras exclusivas.</li></ul><hr><h3>Eventos Dinâmicos</h3><p>As zonas mudam ao longo do jogo. Uma área Estável pode se tornar Amplificada após um boss ser derrotado próximo. O jogador é incentivado a revisitar regiões antigas para encontrar novos segredos e desafios.</p>`,messages:[],status:'progress',createdAt:'14/03/2026',updatedAt:null},
+      ]},
+      characters:{docs:[
+        {id:'c1',title:'Kael — O Portador do Eco',content:`<h2>🧙 Kael — O Portador do Eco</h2><p><em>Documento estruturado com o Double A Framework — criado por Victor Hugo Costa.</em></p><hr><h2>⚔️ Mecânica</h2><p>Personagem principal jogável. Arquetipo de <strong>guerreiro híbrido</strong> — alto dano em burst, mobilidade acima da média, fragilidade moderada. Especializado em combinar ataques físicos com detonações de Eco para maximizar dano em janelas curtas.</p><hr><h2>✦ Atributos</h2><ul><li><strong>Intensidade</strong> — Age com paixão intensa em tudo que faz. Suas emoções amplificam literalmente o poder dos Ecos que carrega.</li><li><strong>Adaptabilidade</strong> — Sobreviveu ao Vácuo por anos aprendendo a se moldar a qualquer ambiente ou situação.</li><li><strong>Lealdade Conflituosa</strong> — Profundamente leal a quem ama, mas sua missão pessoal frequentemente entra em conflito com os interesses coletivos.</li></ul><hr><h2>🎭 Arquétipos</h2><ul><li><strong>Herói</strong> — Assume o papel central na jornada de superação. É o catalisador de todas as mudanças no mundo. <em>(Ref: Link — The Legend of Zelda)</em></li><li><strong>Guerreiro</strong> — Enfrenta conflitos de forma direta e determinada. Prefere resolver problemas com ação a deliberação. <em>(Ref: Kratos — God of War)</em></li></ul><hr><h2>💡 Configuração Conceitual</h2><p>Kael é um sobrevivente moldado pelo Vácuo — um jovem que perdeu sua aldeia para uma Ruptura quando criança e desde então carrega fragmentos do plano etéreo dentro de si, literalmente. Ele não escolheu ser o Portador; o Vácuo o escolheu. Sua intensidade emocional não é uma fraqueza — é o que mantém os Ecos dentro dele coesos e poderosos.</p><hr><h2>📋 Características</h2><ul><li><strong>Nome:</strong> Kael Vordane</li><li><strong>Raça / Espécie:</strong> Humano com fragmentação etérea parcial</li><li><strong>Classe / Função:</strong> Portador — guerreiro híbrido físico/etéreo</li><li><strong>Cultura e Origem:</strong> Aldeia de Cinderval, destruída pela Grande Ruptura (ano 0 do jogo)</li><li><strong>Idade:</strong> 24 anos</li><li><strong>Estilo Visual:</strong> Armadura leve de couro reforçado com incrustações de cristal Etéreo (brilho violeta). Cabelos escuros, cicatriz no antebraço esquerdo onde o primeiro Eco se fixou.</li><li><strong>Equipamentos:</strong> Lâmina Dupla de Ressonância — espada de uma mão que vibra ao acumular Ecos; Manto do Vácuo — capa que se dissolve parcialmente no Modo Etéreo</li><li><strong>Estilo de Combate:</strong> Ágil e explosivo. Combos curtos e letais, seguidos de reposicionamento pelo Modo Etéreo. Não sustenta duelos prolongados.</li></ul>`,messages:[],status:'done',createdAt:'10/03/2026',updatedAt:'13/03/2026'},
+        {id:'c2',title:'Seraphine — A Arquiteta do Vácuo',content:`<h2>🧙 Seraphine — A Arquiteta do Vácuo</h2><hr><h2>⚔️ Mecânica</h2><p>NPC aliada e mentora de Kael. Não é jogável diretamente, mas oferece upgrades, missões e intervenções táticas durante boss fights (invocável uma vez por zona).</p><hr><h2>💡 Configuração Conceitual</h2><p>Seraphine foi a primeira pesquisadora a compreender a natureza estrutural do Vácuo — não como uma ameaça a ser combatida, mas como um tecido vivo que responde à intenção. Ela é fria e calculista na superfície, mas carrega uma culpa profunda por ter inadvertidamente causado a Grande Ruptura décadas atrás ao tentar "estabilizar" o Vácuo com um experimento fracassado.</p><hr><h2>📋 Características</h2><ul><li><strong>Nome:</strong> Seraphine Aldric</li><li><strong>Raça / Espécie:</strong> Humana — idosa (aparência de 60 anos, idade real desconhecida)</li><li><strong>Classe / Função:</strong> Arquiteta do Vácuo — pesquisadora e manipuladora de estruturas etéreas</li><li><strong>Estilo Visual:</strong> Vestes acadêmicas em preto e dourado, óculos com lentes de cristal Etéreo que lhe permitem ver o Vácuo diretamente. Cabelos brancos presos.</li><li><strong>Estilo de Combate:</strong> Não combate diretamente. Quando invocada em boss fights, cria barreiras e amplificadores de Ecos que potencializam o jogador por 30 segundos.</li></ul>`,messages:[],status:'progress',createdAt:'11/03/2026',updatedAt:'12/03/2026'},
+      ]},
+      worldbuilding:{docs:[
+        {id:'w1',title:'O Vácuo — Cosmologia e Lore',content:`<h2>🌍 O Vácuo — Cosmologia e Lore</h2><p>O universo de <strong>Echoes of the Void</strong> é estruturado em dois planos coexistentes: o <strong>Plano Físico</strong> (o mundo palpável dos humanos, cidades, natureza) e o <strong>Vácuo</strong> — um plano etéreo que existe "por cima" da realidade, invisível à maioria, mas constantemente presente.</p><hr><h3>A Natureza do Vácuo</h3><p>O Vácuo não é um lugar de trevas ou caos — é, na verdade, o "eco" de tudo que já existiu. Cada evento, cada emoção intensa, cada morte deixa uma ressonância no Vácuo. Essa ressonância acumula ao longo dos séculos, formando os <em>Ecos</em> que permeiam o mundo.</p><p>Para a maioria das pessoas, o Vácuo é imperceptível. Para os <em>Portadores</em> — indivíduos nascidos ou transformados por exposição intensa ao Vácuo — ele é tão real quanto o ar que respiram.</p><hr><h3>A Grande Ruptura</h3><p>Trinta anos antes dos eventos do jogo, a pesquisadora Seraphine Aldric tentou criar uma "ponte estável" entre os dois planos para permitir comunicação e comércio inter-dimensional. O experimento falhou catastroficamente. A <strong>Grande Ruptura</strong> abriu fissuras permanentes em todo o mundo, criando as Zonas de Vácuo e gerando a primeira geração de Portadores — crianças nascidas na zona de efeito que absorveram fragmentos etéreos.</p><hr><h3>Fações do Mundo</h3><ul><li><strong>A Guarda do Plano</strong> — organização militar criada após a Ruptura para "conter" as Zonas de Vácuo e eliminar Portadores considerados instáveis. Antagonista principal do jogo.</li><li><strong>Os Ressonantes</strong> — grupo underground de Portadores que acreditam ser os herdeiros legítimos do Vácuo. Moralmente ambíguos — seus métodos são violentos mas seu objetivo é legítimo.</li><li><strong>A Ordem do Eco</strong> — académicos e pesquisadores que estudam o Vácuo de forma científica. Aliados naturais de Kael, mas sua neutralidade política frequentemente os impede de agir.</li></ul>`,messages:[],status:'done',createdAt:'09/03/2026',updatedAt:'13/03/2026'},
+        {id:'w2',title:'Mapa Mundial — Regiões e Pontos de Interesse',content:`<h2>🗺️ Mapa Mundial — Regiões e Pontos de Interesse</h2><p>O mundo de Echoes of the Void é um continente único chamado <strong>Aethermoor</strong>, com cinco regiões principais conectadas por uma rede de rotas terrestres e aquáticas. Cada região tem seu bioma único e grau de contaminação do Vácuo.</p><hr><h3>Regiões Principais</h3><ul><li><strong>Cinderval (Zona Suprimida)</strong> — Ruínas da aldeia natal de Kael. Ambiente de tutoria e emocionalmente carregado. Baixo nível de inimigos, alto valor narrativo.</li><li><strong>Metropolis de Erenhal (Zona Estável)</strong> — Maior cidade do continente. Hub principal do jogo — mercadores, missões secundárias, a sede da Guarda do Plano.</li><li><strong>Floresta de Silvarum (Zona Amplificada)</strong> — Floresta ancestral onde o Vácuo é mais denso. Lar dos Ressonantes. Alta dificuldade, recompensas únicas.</li><li><strong>Deserto de Kharrath (Zona de Ruptura)</strong> — Epicentro da Grande Ruptura. O ambiente muda constantemente. Boss final localizado aqui.</li><li><strong>Arquipélago de Thalaris (Zona Estável/Variável)</strong> — Ilhas com ruínas de civilizações antigas que já dominavam o Vácuo. Conteúdo de endgame e lore profundo.</li></ul><hr><h3>Pontos Notáveis</h3><ul><li>Torre de Seraphine — laboratório/fortaleza da Arquiteta, ponto central da narrativa</li><li>As Três Fissuras — portais permanentes entre os planos, guardiados pela Guarda do Plano</li><li>Mercado Etéreo — mercado underground dos Ressonantes, acessível apenas em Modo Etéreo</li></ul>`,messages:[],status:'done',createdAt:'10/03/2026',updatedAt:'12/03/2026'},
+      ]},
+      narrative:{docs:[
+        {id:'n1',title:'Estrutura Narrativa — Três Atos',content:`<h2>📖 Estrutura Narrativa — Três Atos</h2><p>A narrativa de <strong>Echoes of the Void</strong> segue uma estrutura de três atos clássica com uma reviravolta central que recontextualiza os eventos do Ato I.</p><hr><h3>Ato I — O Portador Relutante</h3><p>Kael vive escondido em Erenhal, suprimindo seus poderes para evitar perseguição da Guarda do Plano. Um acidente durante uma briga de rua expõe seus Ecos publicamente. Forçado a fugir, ele encontra Seraphine — que revela que ele é o Portador "primário", o único capaz de fechar as Fissuras da Grande Ruptura.</p><p><strong>Conflito principal:</strong> Kael não quer ser herói. Ele quer apenas sobreviver. A primeira metade do Ato I é sobre convencê-lo de que fuga não é opção.</p><hr><h3>Ato II — A Verdade do Vácuo</h3><p>Kael começa a trabalhar com os Ressonantes para encontrar as Fissuras. À medida que fecha cada uma, descobre que a Grande Ruptura não foi um acidente — foi sabotagem. Alguém dentro da Ordem do Eco queria abrir as Fissuras intencionalmente para fusionar os dois planos permanentemente.</p><p><strong>Reviravolta central (ponto médio):</strong> Seraphine é a sabotadora. Mas sua motivação não é malícia — ela descobriu que o Vácuo está "morrendo" e a fusão é a única forma de salvá-lo. Ela mentiu sobre o acidente para proteger Kael da verdade.</p><hr><h3>Ato III — A Escolha do Eco</h3><p>Kael precisa decidir: fechar as Fissuras (salva o Plano Físico, deixa o Vácuo morrer) ou completar a fusão de Seraphine (salva ambos os planos, mas transforma irreversivelmente todos os seres vivos em Portadores). Três finais possíveis dependendo das escolhas acumuladas ao longo do jogo.</p><hr><h3>Temas Centrais</h3><ul><li>Identidade versus destino — Kael é definido pelo que é ou pelo que escolhe ser?</li><li>Culpa e redenção — Seraphine e o peso de uma decisão que destruiu o mundo</li><li>O que é real — quando o Vácuo e o Físico são igualmente válidos, o que define a "realidade"?</li></ul>`,messages:[],status:'done',createdAt:'09/03/2026',updatedAt:'14/03/2026'},
+        {id:'n2',title:'Diálogos e Tom Narrativo',content:`<h2>✍️ Diálogos e Tom Narrativo</h2><p>O tom de <strong>Echoes of the Void</strong> é <strong>sombrio mas não niilista</strong>. O mundo passou por uma catástrofe, mas as pessoas continuam vivendo, criando comunidades, encontrando alegria. A escuridão existe para dar peso às vitórias, não para esmagar o jogador.</p><hr><h3>Voz de Kael</h3><p>Kael fala de forma direta, às vezes seca. Ele não é eloquente mas é honesto. Usa humor negro como mecanismo de defesa. Quando está genuinamente emocionado, suas frases ficam mais curtas, menos polidas.</p><p><em>Exemplo de diálogo:</em></p><p>"Você quer que eu salve o mundo." — Kael (plano, sem entonação de pergunta)<br/>"Essencialmente, sim." — Seraphine<br/>"Que conveniente para todo mundo exceto eu."</p><hr><h3>Voz de Seraphine</h3><p>Precisa, acadêmica, raramente usa contrações. Quando mente, suas frases ficam ligeiramente mais longas — ela preenche o silêncio com palavras para esconder o desconforto. Quando honesta, é brutalmente direta.</p><hr><h3>Harmonia Ludonarrativa</h3><p>As mecânicas de combate devem espelhar a narrativa: Kael usando o Modo Etéreo representa ele aceitando sua natureza de Portador. No início do jogo, o jogador é encorajado a depender do Modo Físico (Kael em negação). Conforme a narrativa avança, o Modo Etéreo se torna mais poderoso — externalizando o crescimento do personagem.</p>`,messages:[],status:'progress',createdAt:'12/03/2026',updatedAt:null},
+      ]},
+      leveldesign:{docs:[
+        {id:'l1',title:'Nível 1 — Ruínas de Cinderval',content:`<h2>🗺️ Nível 1 — Ruínas de Cinderval</h2><p>O nível de abertura do jogo. Serve como tutorial emocional e mecânico simultaneamente. O jogador assume controle de Kael enquanto ele retorna às ruínas de sua aldeia natal — destruída pela Grande Ruptura 20 anos antes.</p><hr><h3>Visão Coerente</h3><p>Tom: melancolia silenciosa. O lugar que foi lar de Kael agora é uma casca habitada por inimigos menores da Guarda do Plano. A arquitetura ainda tem traços do que foi — uma praça central, a estrutura de uma escola — mas tudo em ruínas.</p><p>Objetivo emocional do nível: fazer o jogador sentir o peso da perda de Kael antes mesmo de apresentar a história verbalmente.</p><hr><h3>3Cs</h3><ul><li><strong>Câmera:</strong> Terceira pessoa, câmera sobre o ombro direito. FOV 85°. A câmera levemente mais baixa que o normal durante a abertura enfatiza o peso do momento.</li><li><strong>Personagem:</strong> Kael com movimentação ainda "reprimida" — velocidade de corrida reduzida em 20%, sem acesso ao Modo Etéreo (narrativamente justificado).</li><li><strong>Controles:</strong> Tutorial gradual. Ataque básico introduzido na entrada. Dodge introduzido no primeiro encontro com inimigos. Sem sobrecarga de informação.</li></ul><hr><h3>Layout — Paper Design</h3><p>Nível linear com uma bifurcação opcional: o caminho da esquerda leva à casa destruída de Kael (conteúdo emocional, item colecionável único, sem inimigos); o caminho da direita é o caminho principal com inimigos e o mini-boss.</p><hr><h3>Narrativa Ambiental</h3><ul><li>Brinquedo de madeira quebrado no chão da praça central — remete à infância de Kael</li><li>Uma fogueira ainda acesa, quase extinta — alguém passou por aqui recentemente</li><li>Placas de identificação de casas ainda pregadas nas paredes carbonizadas</li><li>Um altar improvisado com flores — alguém ainda visita e presta homenagens</li></ul><hr><h3>Ensinando a Mecânica de Ecos</h3><p>O primeiro inimigo do jogo tem exatamente 3 barras de saúde. O tutorial explica: cada ataque deposita um Eco. Com 3 Ecos, o inimigo fica em stagger. Isso ensina a mecânica central sem texto — o jogador descobre por experimentação.</p>`,messages:[],status:'done',createdAt:'11/03/2026',updatedAt:'14/03/2026'},
+        {id:'l2',title:'Hub — Metrópolis de Erenhal',content:`<h2>🏙️ Hub — Metrópolis de Erenhal</h2><p>Erenhal é o hub central do jogo — a maior cidade de Aethermoor e a única totalmente protegida por barreiras que suprimem o Vácuo. Para Kael, é simultaneamente um refúgio e uma prisão.</p><hr><h3>Estrutura do Hub</h3><p>Erenhal é dividida em quatro distritos navegáveis livremente:</p><ul><li><strong>Distrito Baixo</strong> — favelas e mercado negro. Maioria de NPCs aliados, missões secundárias, o contato inicial com os Ressonantes.</li><li><strong>Distrito Médio</strong> — vida urbana comum. Lojas, NPCs com memória de diálogos, eventos dinâmicos.</li><li><strong>Distrito Alto</strong> — sede da Guarda do Plano, palácio do Governador. Zona de tensão — Kael não deveria estar aqui.</li><li><strong>Subterrâneo</strong> — acessível apenas em Modo Etéreo após Ato I. Mercado dos Ressonantes, quests exclusivas.</li></ul><hr><h3>Design de Progressão no Hub</h3><p>O hub muda visualmente ao longo do jogo. No Ato I é vibrante e movimentado. No Ato II, após eventos narrativos, a presença da Guarda aumenta — mais patrulhas, menos NPCs na rua, clima de tensão. No Ato III, dependendo das escolhas, o hub pode estar em guerra civil ou em paz negociada.</p>`,messages:[],status:'progress',createdAt:'13/03/2026',updatedAt:null},
+      ]},
+      flowcharts:{docs:[
+        {id:'f1',title:'Fluxo de Progressão de Missão Principal',framework:'flowbuilder',flowData:{nodes:[{id:'fn1',type:'start',x:320,y:40,w:120,h:44,label:'Início da Missão'},{id:'fn2',type:'process',x:280,y:130,w:200,h:44,label:'Chegada em Cinderval'},{id:'fn3',type:'decision',x:260,y:220,w:240,h:52,label:'Explorar casa de Kael?'},{id:'fn4',type:'process',x:100,y:320,w:180,h:44,label:'Cutscene emocional + item'},{id:'fn5',type:'process',x:380,y:320,w:180,h:44,label:'Prossegue direto'},{id:'fn6',type:'process',x:240,y:420,w:200,h:44,label:'Encontro com inimigos'},{id:'fn7',type:'decision',x:230,y:510,w:220,h:52,label:'Derrotou mini-boss?'},{id:'fn8',type:'process',x:80,y:610,w:160,h:44,label:'Morte — Respawn'},{id:'fn9',type:'process',x:380,y:610,w:160,h:44,label:'Cutscene: Seraphine'},{id:'fn10',type:'end',x:310,y:700,w:140,h:44,label:'Fim do Nível 1'}],edges:[{id:'fe1',from:'fn1',fromPort:'bottom',to:'fn2',toPort:'top'},{id:'fe2',from:'fn2',fromPort:'bottom',to:'fn3',toPort:'top'},{id:'fe3',from:'fn3',fromPort:'left',to:'fn4',toPort:'top',label:'Sim'},{id:'fe4',from:'fn3',fromPort:'right',to:'fn5',toPort:'top',label:'Não'},{id:'fe5',from:'fn4',fromPort:'bottom',to:'fn6',toPort:'top'},{id:'fe6',from:'fn5',fromPort:'bottom',to:'fn6',toPort:'top'},{id:'fe7',from:'fn6',fromPort:'bottom',to:'fn7',toPort:'top'},{id:'fe8',from:'fn7',fromPort:'left',to:'fn8',toPort:'top',label:'Não'},{id:'fe9',from:'fn7',fromPort:'right',to:'fn9',toPort:'top',label:'Sim'},{id:'fe10',from:'fn8',fromPort:'bottom',to:'fn6',toPort:'left'},{id:'fe11',from:'fn9',fromPort:'bottom',to:'fn10',toPort:'top'}]},content:'',messages:[],status:'done',createdAt:'12/03/2026',updatedAt:'14/03/2026'},
+        {id:'f2',title:'Fluxo de Sistema de Combate',framework:'flowbuilder',flowData:{nodes:[{id:'fc1',type:'start',x:300,y:30,w:140,h:44,label:'Encontro Inimigo'},{id:'fc2',type:'decision',x:260,y:120,w:220,h:52,label:'Modo Físico ou Etéreo?'},{id:'fc3',type:'process',x:80,y:220,w:180,h:44,label:'Ataque Físico'},{id:'fc4',type:'process',x:400,y:220,w:180,h:44,label:'Habilidade Etérea'},{id:'fc5',type:'process',x:80,y:310,w:180,h:44,label:'Deposita Eco no inimigo'},{id:'fc6',type:'process',x:400,y:310,w:180,h:44,label:'Consome Ressonância'},{id:'fc7',type:'decision',x:240,y:400,w:240,h:52,label:'Ecos acumulados ≥ 3?'},{id:'fc8',type:'process',x:80,y:500,w:180,h:44,label:'Continua combo'},{id:'fc9',type:'process',x:400,y:500,w:180,h:44,label:'Stagger + bonus dano'},{id:'fc10',type:'decision',x:240,y:590,w:240,h:52,label:'Ecos ≥ 5?'},{id:'fc11',type:'process',x:80,y:680,w:180,h:44,label:'Normal — aguarda mais'},{id:'fc12',type:'process',x:400,y:680,w:200,h:44,label:'Ressonância Total disponível!'},{id:'fc13',type:'end',x:300,y:770,w:140,h:44,label:'Inimigo derrotado'}],edges:[{id:'fce1',from:'fc1',fromPort:'bottom',to:'fc2',toPort:'top'},{id:'fce2',from:'fc2',fromPort:'left',to:'fc3',toPort:'top',label:'Físico'},{id:'fce3',from:'fc2',fromPort:'right',to:'fc4',toPort:'top',label:'Etéreo'},{id:'fce4',from:'fc3',fromPort:'bottom',to:'fc5',toPort:'top'},{id:'fce5',from:'fc4',fromPort:'bottom',to:'fc6',toPort:'top'},{id:'fce6',from:'fc5',fromPort:'bottom',to:'fc7',toPort:'top'},{id:'fce7',from:'fc6',fromPort:'bottom',to:'fc7',toPort:'top'},{id:'fce8',from:'fc7',fromPort:'left',to:'fc8',toPort:'top',label:'Não'},{id:'fce9',from:'fc7',fromPort:'right',to:'fc9',toPort:'top',label:'Sim'},{id:'fce10',from:'fc8',fromPort:'bottom',to:'fc10',toPort:'top'},{id:'fce11',from:'fc9',fromPort:'bottom',to:'fc10',toPort:'top'},{id:'fce12',from:'fc10',fromPort:'left',to:'fc11',toPort:'top',label:'Não'},{id:'fce13',from:'fc10',fromPort:'right',to:'fc12',toPort:'top',label:'Sim!'},{id:'fce14',from:'fc11',fromPort:'bottom',to:'fc13',toPort:'top'},{id:'fce15',from:'fc12',fromPort:'bottom',to:'fc13',toPort:'top'}]},content:'',messages:[],status:'progress',createdAt:'13/03/2026',updatedAt:null},
+      ]},
+      production:{tasks:[
+        {id:'t1',title:'Design do sistema de Ecos — documento GDD completo',desc:'Finalizar a especificação técnica do sistema de acúmulo e detonação de Ecos para entrega ao time de programação.',priority:'high',category:'Design',column:'done',createdAt:'01/03/2026',updatedAt:'10/03/2026'},
+        {id:'t2',title:'Concept art — Kael (3 variações de armadura)',desc:'Criar três propostas visuais para a armadura de Kael representando progressão: início, meio e endgame.',priority:'high',category:'Arte',column:'done',createdAt:'02/03/2026',updatedAt:'11/03/2026'},
+        {id:'t3',title:'Protótipo de combate — Modo Físico',desc:'Implementar protótipo jogável do sistema de combate em Modo Físico com feedback de Ecos.',priority:'high',category:'Programação',column:'done',createdAt:'03/03/2026',updatedAt:'12/03/2026'},
+        {id:'t4',title:'Implementar Modo Etéreo — troca e cooldown',desc:'Programar a troca entre modos com animação de transição, custo de Ressonância e estado de cooldown.',priority:'high',category:'Programação',column:'review',createdAt:'08/03/2026',updatedAt:'14/03/2026'},
+        {id:'t5',title:'Mapa de Erenhal — blockout de geometria',desc:'Criar o blockout inicial da metrópolis com os quatro distritos definidos. Sem arte final — apenas volumes e escala.',priority:'medium',category:'Level Design',column:'review',createdAt:'09/03/2026',updatedAt:'13/03/2026'},
+        {id:'t6',title:'Animações de Kael — set básico de combate',desc:'Produzir animações de idle, walk, run, ataque x1/x2/x3, dodge, hit e death.',priority:'high',category:'Arte',column:'doing',createdAt:'10/03/2026',updatedAt:'14/03/2026'},
+        {id:'t7',title:'Sistema de diálogos — estrutura e tooling',desc:'Definir formato de arquivo de diálogos e implementar o sistema de exibição in-game com suporte a escolhas.',priority:'medium',category:'Programação',column:'doing',createdAt:'11/03/2026',updatedAt:'14/03/2026'},
+        {id:'t8',title:'Trilha sonora — tema principal (demo)',desc:'Compor e produzir demo do tema principal de Echoes of the Void. Referências: NieR Automata, Hollow Knight.',priority:'medium',category:'Áudio',column:'doing',createdAt:'12/03/2026',updatedAt:'14/03/2026'},
+        {id:'t9',title:'HUD — barra de Ressonância e contador de Ecos',desc:'Projetar e implementar os elementos de HUD do sistema de combate: barra de Ressonância, indicador de Ecos ativos e indicador de modo atual.',priority:'medium',category:'UI/UX',column:'todo',createdAt:'13/03/2026',updatedAt:null},
+        {id:'t10',title:'IA de inimigos — comportamento básico Guardas',desc:'Implementar comportamento de patrulha, detecção do jogador, perseguição e ataque para os soldados da Guarda do Plano.',priority:'medium',category:'Programação',column:'todo',createdAt:'13/03/2026',updatedAt:null},
+        {id:'t11',title:'Cutscene — abertura Cinderval (storyboard)',desc:'Criar storyboard completo da cutscene de abertura do jogo em Cinderval. Deve estabelecer tom e apresentar Kael sem diálogo.',priority:'low',category:'Narrativa',column:'todo',createdAt:'14/03/2026',updatedAt:null},
+        {id:'t12',title:'SFX — pacote de sons de combate básico',desc:'Produzir efeitos sonoros para ataques, dodge, impacto, deposição de Eco e detonação de Ressonância Total.',priority:'medium',category:'Áudio',column:'backlog',createdAt:'14/03/2026',updatedAt:null},
+        {id:'t13',title:'Localização — estrutura para PT/EN/ES',desc:'Definir pipeline de localização e extrair todas as strings de interface para arquivo externo.',priority:'low',category:'Programação',column:'backlog',createdAt:'14/03/2026',updatedAt:null},
+        {id:'t14',title:'Boss 1 — design e moveset (Comandante da Guarda)',desc:'Documentar design completo do primeiro boss: moveset, fases, padrões de ataque e janelas de vulnerabilidade.',priority:'high',category:'Design',column:'backlog',createdAt:'14/03/2026',updatedAt:null},
+        {id:'t15',title:'Playtest interno — build alpha v0.1',desc:'Organizar sessão de playtest interno com a build alpha focando no sistema de Ecos e na progressão do Nível 1.',priority:'low',category:'QA',column:'backlog',createdAt:'14/03/2026',updatedAt:null},
+      ]},
+    },
+  });
   const [editContent,setEditContent]=useState(''),[hasUnsaved,setHasUnsaved]=useState(false);
   const [input,setInput]=useState(''),[loading,setLoading]=useState(false);
   const [scrolled,setScrolled]=useState(false);
@@ -5168,7 +5690,7 @@ function GDDHubInner(){
   const buildCtx=(pId,mId,docId)=>{
     const proj=projects.find(p=>p.id===pId),data=pData[pId]||{};
     let ctx='PROJETO: "'+proj?.name+'" | Gênero: '+proj?.genre+' | Plataforma: '+proj?.platform+'\n\n';
-    MODULES.filter(m=>m.id!=='brainstorming').forEach(m=>{const md=data[m.id];if(!md?.docs?.length)return;ctx+='=== '+m.label+' ===\n';md.docs.forEach(doc=>{ctx+='• "'+doc.title+'"'+(m.id===mId&&doc.id===docId?' ← DOC ATUAL':'')+': '+stripHtml(doc.content).slice(0,300)+'\n';});ctx+='\n';});
+    MODULES.filter(m=>m.id!=='brainstorming'&&m.id!=='production').forEach(m=>{const md=data[m.id];if(!md?.docs?.length)return;ctx+='=== '+m.label+' ===\n';md.docs.forEach(doc=>{ctx+='• "'+doc.title+'"'+(m.id===mId&&doc.id===docId?' ← DOC ATUAL':'')+': '+stripHtml(doc.content).slice(0,300)+'\n';});ctx+='\n';});
     return ctx;
   };
   const getDocMessages=()=>!activeDoc||!project||!module?[]:getMod(project.id,module.id).docs.find(d=>d.id===activeDoc.id)?.messages||[];
@@ -5349,7 +5871,13 @@ function GDDHubInner(){
         <h2 style={{margin:'0 0 4px',fontSize:22,fontWeight:700}}>{t.dash_h}</h2>
         <p style={{color:th.muted,margin:'0 0 24px',fontSize:13}}>{projects.length} projeto{projects.length!==1?'s':''}</p>
         <div style={S.grid()}>
-          {projects.map(p=>(
+          {projects.map(p=>{
+            const prodTasks=pData?.[p.id]?.production?.tasks||[];
+            const prodTotal=prodTasks.length;
+            const prodDone=prodTasks.filter(t=>t.column==='done').length;
+            const progress=prodTotal>0?Math.round((prodDone/prodTotal)*100):0;
+            const hasKanban=prodTotal>0;
+            return(
             <div key={p.id} style={{...S.card(p.color),cursor:'default'}} onMouseEnter={e=>{e.currentTarget.style.borderColor=p.color;e.currentTarget.style.transform='translateY(-2px)';}} onMouseLeave={e=>{e.currentTarget.style.borderColor=p.color+'28';e.currentTarget.style.transform='none';}}>
               <div style={{position:'absolute',top:-20,right:-20,fontSize:80,opacity:.06}}>{p.emoji}</div>
               <div style={{position:'absolute',top:12,right:12,display:'flex',gap:5}}>
@@ -5359,11 +5887,15 @@ function GDDHubInner(){
               <div style={{fontSize:34,marginBottom:14,cursor:'pointer'}} onClick={()=>{setProject(p);setView('project');}}>{p.emoji}</div>
               <div style={{fontWeight:700,fontSize:16,marginBottom:4,cursor:'pointer'}} onClick={()=>{setProject(p);setView('project');}}>{p.name}</div>
               <div style={{color:th.dim,fontSize:12,marginBottom:16}}>{p.genre} · {p.platform}</div>
-              <div style={{background:'#1e1e30',borderRadius:4,height:4,marginBottom:6}}><div style={{width:p.progress+'%',height:'100%',background:'linear-gradient(90deg,'+p.color+','+p.color+'88)',borderRadius:4}}/></div>
-              <div style={{color:'#334155',fontSize:11,marginBottom:14}}>{p.progress}% concluído</div>
+              <div style={{background:'#1e1e30',borderRadius:4,height:4,marginBottom:6}}><div style={{width:progress+'%',height:'100%',background:'linear-gradient(90deg,'+p.color+','+p.color+'88)',borderRadius:4,transition:'width .4s'}}/></div>
+              <div style={{color:'#334155',fontSize:11,marginBottom:14,display:'flex',alignItems:'center',gap:6}}>
+                <span>{progress}% concluído</span>
+                {hasKanban&&<span style={{marginLeft:'auto',color:'#f43f5e',fontSize:10,fontWeight:600}}>🏭 {prodDone}/{prodTotal} tarefas</span>}
+              </div>
               <button style={S.btn(p.color+'22',p.color,{border:'1px solid '+p.color+'44',padding:'7px 14px',width:'100%',borderRadius:8,fontSize:12})} onClick={()=>{setProject(p);setView('project');}}>Abrir projeto →</button>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
       {showNew&&(<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.7)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:100}}><div style={{background:th.bg2,border:'1px solid '+th.border,borderRadius:18,padding:32,width:360}}><h3 style={{margin:'0 0 22px',fontSize:18}}>Novo Projeto</h3>{[['name','Nome do jogo *'],['genre','Gênero'],['platform','Plataforma']].map(([k,l])=><div key={k} style={{marginBottom:14}}><div style={{color:th.dim,fontSize:12,marginBottom:6}}>{l}</div><input style={S.inp} value={form[k]} placeholder={l} onChange={e=>setForm(f=>({...f,[k]:e.target.value}))} onKeyDown={e=>e.key==='Enter'&&createProject()}/></div>)}<div style={{display:'flex',gap:10,marginTop:22}}><button style={S.btn()} onClick={createProject}>Criar</button><button style={S.btn(th.border)} onClick={()=>setShowNew(false)}>{t.cancel}</button></div></div></div>)}
@@ -5375,6 +5907,11 @@ function GDDHubInner(){
   if(view==='brainstorming')return(
     !project?null:
     <CanvasBoard project={project} pData={pData} setPData={setPData} onBack={()=>setView('project')}/>
+  );
+
+  if(view==='production')return(
+    !project?null:
+    <KanbanBoard project={project} pData={pData} setPData={setPData} onBack={()=>setView('project')}/>
   );
 
   if(!project&&['mda-guided','double-a-guided','fourkeys-guided','colors-guided','octalysis-guided','pens-guided','tetrad-guided','ludonarrative-guided','reedsy-wb-guided','unity-ld-guided'].includes(view)){setView('dashboard');return null;}
@@ -5461,22 +5998,27 @@ function GDDHubInner(){
         <div style={S.grid()}>
           {MODULES.map(m=>{
             const isBrain=m.id==='brainstorming';
-            const docs=isBrain?[]:getMod(project.id,m.id).docs||[];
+            const isProd=m.id==='production';
+            const docs=isBrain||isProd?[]:getMod(project.id,m.id).docs||[];
             const doneCount=docs.filter(d=>d.status==='done').length;
+            const taskCount=isProd?(pData?.[project.id]?.production?.tasks||[]).length:0;
+            const taskDone=isProd?(pData?.[project.id]?.production?.tasks||[]).filter(t=>t.column==='done').length:0;
+            const taskPct=taskCount>0?Math.round((taskDone/taskCount)*100):0;
             return(
               <div key={m.id} style={S.card(m.color)}
-                onClick={()=>{if(isBrain){setView('brainstorming');}else{setModule(m);setView('module');}}}
+                onClick={()=>{if(isBrain){setView('brainstorming');}else if(isProd){setView('production');}else{setModule(m);setView('module');}}}
                 onMouseEnter={e=>{e.currentTarget.style.borderColor=m.color;e.currentTarget.style.transform='translateY(-2px)';}}
                 onMouseLeave={e=>{e.currentTarget.style.borderColor=m.color+'28';e.currentTarget.style.transform='none';}}>
                 <div style={{position:'absolute',top:-14,right:-14,fontSize:60,opacity:.05}}>{m.icon}</div>
                 <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
                   <div style={{fontSize:28,marginBottom:12}}>{m.icon}</div>
-                  {!isBrain&&docs.length>0&&<div style={{background:m.color,borderRadius:10,padding:'2px 9px',fontSize:10,fontWeight:700,color:'#000'}}>{doneCount}/{docs.length}</div>}
+                  {!isBrain&&!isProd&&docs.length>0&&<div style={{background:m.color,borderRadius:10,padding:'2px 9px',fontSize:10,fontWeight:700,color:'#000'}}>{doneCount}/{docs.length}</div>}
                   {isBrain&&<div style={{background:m.color+'22',border:'1px solid '+m.color+'44',borderRadius:10,padding:'2px 9px',fontSize:10,fontWeight:700,color:m.color}}>Canvas</div>}
+                  {isProd&&<div style={{background:m.color+'22',border:'1px solid '+m.color+'44',borderRadius:10,padding:'2px 9px',fontSize:10,fontWeight:700,color:m.color}}>Kanban</div>}
                 </div>
                 <div style={{fontWeight:700,fontSize:14,color:m.color,marginBottom:5}}>{m.label}</div>
                 <div style={{color:th.dim,fontSize:12,lineHeight:1.5,marginBottom:10}}>{m.desc}</div>
-                <div style={{fontSize:11,color:'#334155'}}>{isBrain?'Post-its · Caneta · Benchmarking IA':docs.length===0?'Nenhum documento':docs.length+' documento'+(docs.length!==1?'s':'')+' · '+doneCount+' concluído'+(doneCount!==1?'s':'')}</div>
+                <div style={{fontSize:11,color:'#334155'}}>{isBrain?'Post-its · Caneta · Benchmarking IA':isProd?(taskCount===0?'Nenhuma tarefa — clique para começar':<span style={{display:'flex',flexDirection:'column',gap:4}}><span>{taskCount+' tarefa'+(taskCount!==1?'s':'')+' · '+taskDone+' concluída'+(taskDone!==1?'s':'')}</span><div style={{height:3,background:m.color+'22',borderRadius:2}}><div style={{width:taskPct+'%',height:'100%',background:m.color,borderRadius:2,transition:'width .3s'}}/></div></span>):docs.length===0?'Nenhum documento':docs.length+' documento'+(docs.length!==1?'s':'')+' · '+doneCount+' concluído'+(doneCount!==1?'s':'')}</div>
               </div>
             );
           })}
